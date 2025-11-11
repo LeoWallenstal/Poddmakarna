@@ -28,12 +28,55 @@
         /// </summary>
         private void InitializeComponent()
         {
-            this.components = new System.ComponentModel.Container();
-            this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
-            this.Text = "Form1";
+            txtBoxURL = new TextBox();
+            btnGetPodcast = new Button();
+            label1 = new Label();
+            SuspendLayout();
+            // 
+            // txtBoxURL
+            // 
+            txtBoxURL.Location = new Point(39, 29);
+            txtBoxURL.Name = "txtBoxURL";
+            txtBoxURL.Size = new Size(150, 31);
+            txtBoxURL.TabIndex = 0;
+            // 
+            // btnGetPodcast
+            // 
+            btnGetPodcast.Location = new Point(212, 30);
+            btnGetPodcast.Name = "btnGetPodcast";
+            btnGetPodcast.Size = new Size(112, 34);
+            btnGetPodcast.TabIndex = 1;
+            btnGetPodcast.Text = "Hämta";
+            btnGetPodcast.UseVisualStyleBackColor = true;
+            btnGetPodcast.Click += btnGetPodcast_Click;
+            // 
+            // label1
+            // 
+            label1.AutoSize = true;
+            label1.Location = new Point(53, 99);
+            label1.Name = "label1";
+            label1.Size = new Size(59, 25);
+            label1.TabIndex = 2;
+            label1.Text = "label1";
+            // 
+            // Form1
+            // 
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(800, 450);
+            Controls.Add(label1);
+            Controls.Add(btnGetPodcast);
+            Controls.Add(txtBoxURL);
+            Name = "Form1";
+            Text = "Form1";
+            ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
+
+        private TextBox txtBoxURL;
+        private Button btnGetPodcast;
+        private Label label1;
     }
 }
