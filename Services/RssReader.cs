@@ -20,8 +20,6 @@ namespace Services
                 XmlReader xmlReader = XmlReader.Create(rssUrl);
                 SyndicationFeed feed = SyndicationFeed.Load(xmlReader);
 
-                Debug.WriteLine(feed.ImageUrl?.ToString());
-
                 Podcast podcast = new Podcast
                 {
                     Title = feed.Title.Text ?? "No Title",

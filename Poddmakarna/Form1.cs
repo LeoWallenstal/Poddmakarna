@@ -15,8 +15,6 @@ namespace Poddmakarna
         private async void btnGetPodcast_Click(object sender, EventArgs e)
         {
             string url = txtBoxURL.Text;
-            Debug.WriteLine(url);
-
             IRssReader rssReader = new RssReader();
             Podcast podcast = await rssReader.GetPodcastFromRssAsync(url);
             label1.Text = podcast.Title;
