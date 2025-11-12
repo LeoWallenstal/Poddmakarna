@@ -4,18 +4,23 @@ using System.Linq;
 using System.Reflection;
 using System.Text;
 using System.Threading.Tasks;
+using MongoDB.Bson.Serialization;
+using MongoDB.Bson.Serialization.Attributes;
 
 namespace Models
 {
-    public class Podcast
+    public class Podcast : BaseEntity
     {
-        //Id
-        public string Title { get; set; }
+        //Id from BaseEntity
+        public string Title { get; set; } //Validering i setters
         public string Description { get; set; }
         public string Publisher { get; set; }
         public string ImageUrl { get; set; }
-        public List<string> Categories { get; set; }
-        //public List<Episode> Episodes { get; set; }
+        public string Categories { get; set; }
+        public List<Episode> Episodes { get; set; } = new();
 
+        public Podcast() : base() { //Ska man ha flera konstruktorer här?? (MongoDB osv)
+        
+        }
     }
 }
