@@ -1,4 +1,5 @@
-﻿using Models;
+﻿using DAL;
+using Models;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -14,21 +15,27 @@ namespace UI
 {
     public partial class Form2 : Form
     {
+        private readonly MongoDbContext _dbContext;
+        private readonly PodRepository _podRepo;
         public Form2()
         {
             InitializeComponent();
             this.Load += LoadPodcast;
-
+            _dbContext = new MongoDbContext();
+            _podRepo = new PodRepository(_dbContext.Database.GetCollection<Podcast>("Pods"));
 
         }
 
         private async void LoadPodcast(object sender, EventArgs e)
         {
-            RssReader rssReader = new RssReader();
-            Podcast? podcast = await rssReader.GetPodcastFromRssAsync("https://feed.pod.space/ursakta");
-            for (int i = 0; i < 5; i++)
+            //RssReader rssReader = new RssReader();
+            //Podcast? podcast = await rssReader.GetPodcastFromRssAsync("https://feed.pod.space/ursakta");
+
+            List<Podcast> allaPoddar = await _podRepo.GetAllAsync();
+
+            foreach(Podcast pod in allaPoddar)
             {
-                PodCard podCard = new PodCard(podcast);
+                PodCard podCard = new PodCard(pod);
                 flpMyPods.Controls.Add(podCard);
                 podCard.MouseClick += PodCard_Clicked;
             }
