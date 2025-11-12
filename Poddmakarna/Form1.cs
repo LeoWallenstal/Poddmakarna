@@ -1,4 +1,5 @@
 using Models;
+using MongoDB.Driver;
 using Services;
 using System.Diagnostics;
 using System.Threading.Tasks;
@@ -16,7 +17,9 @@ namespace Poddmakarna
         {
             string url = txtBoxURL.Text;
             IRssReader rssReader = new RssReader();
-            Podcast podcast = await rssReader.GetPodcastFromRssAsync(url);
+            Podcast? podcast = await rssReader.GetPodcastFromRssAsync(url);
+            if (podcast == null) return;
+
             label1.Text = podcast.Title;
         }
     }
