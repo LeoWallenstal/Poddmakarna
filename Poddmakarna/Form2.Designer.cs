@@ -29,6 +29,7 @@
         private void InitializeComponent()
         {
             flpMyPods = new FlowLayoutPanel();
+            pPodPanel = new Panel();
             SuspendLayout();
             // 
             // flpMyPods
@@ -36,14 +37,22 @@
             flpMyPods.AutoScroll = true;
             flpMyPods.Location = new Point(12, 12);
             flpMyPods.Name = "flpMyPods";
-            flpMyPods.Size = new Size(591, 434);
+            flpMyPods.Size = new Size(574, 434);
             flpMyPods.TabIndex = 0;
+            // 
+            // pPodPanel
+            // 
+            pPodPanel.Location = new Point(609, 12);
+            pPodPanel.Name = "pPodPanel";
+            pPodPanel.Size = new Size(860, 460);
+            pPodPanel.TabIndex = 1;
             // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1082, 480);
+            ClientSize = new Size(1518, 480);
+            Controls.Add(pPodPanel);
             Controls.Add(flpMyPods);
             Name = "Form2";
             Text = "Form2";
@@ -53,5 +62,6 @@
         #endregion
 
         private FlowLayoutPanel flpMyPods;
+        private Panel pPodPanel;
     }
 }

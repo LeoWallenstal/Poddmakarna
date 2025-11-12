@@ -17,20 +17,30 @@ namespace UI
         public Form2()
         {
             InitializeComponent();
+            this.Load += LoadPodcast;
+
+
+        }
+
+        private async void LoadPodcast(object sender, EventArgs e)
+        {
             RssReader rssReader = new RssReader();
-            Podcast podcast = rssReader.GetPodcastFromRssAsync("https://feed.pod.space/ursakta").Result;
+            Podcast? podcast = await rssReader.GetPodcastFromRssAsync("https://feed.pod.space/ursakta");
             for (int i = 0; i < 5; i++)
             {
                 PodCard podCard = new PodCard(podcast);
                 flpMyPods.Controls.Add(podCard);
                 podCard.MouseClick += PodCard_Clicked;
-            }              
-
+            }
         }
 
         public void PodCard_Clicked(object sender, EventArgs e)
         {
-            MessageBox.Show("Form2 has been notified that PodCard was clicked!");
+            if (sender is PodCard podCard)
+            {
+                pPodPanel.Controls.Clear();
+                pPodPanel.Controls.Add(new PodPanel(podCard.Podcast));
+            }
         }
     }
 }
