@@ -13,11 +13,13 @@ namespace Services
 {
     public class RssReader : IRssReader
     {
+       
         public async Task<Podcast?> GetPodcastFromRssAsync(string rssUrl)
         {
-            return await Task.Run(() =>
-            {
+           
                 try
+                {
+                return await Task.Run(() =>
                 {
                     XmlReader xmlReader = XmlReader.Create(rssUrl);
                     SyndicationFeed feed = SyndicationFeed.Load(xmlReader);
@@ -30,6 +32,7 @@ namespace Services
 
                     };
                     return podcast;
+                    });
                 }
                 catch (Exception ex)
                 {
@@ -37,7 +40,7 @@ namespace Services
                     Debug.WriteLine($"Error fetching RSS feed: {ex.Message}");
                     return null;
                 }
-            });
+            
         }
     }
 }

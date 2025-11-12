@@ -14,10 +14,10 @@ namespace UI
 {
     public partial class PodCard : UserControl
     {
-        private readonly Podcast _podcast;
+        public Podcast Podcast { get; }
         public PodCard(Podcast podcast)
         {
-            _podcast = podcast;
+            Podcast = podcast;
             InitializeComponent();
             LoadPodCard();
 
@@ -32,9 +32,9 @@ namespace UI
 
         private void LoadPodCard()
         {
-            lblTitle.Text = _podcast.Title;
+            lblTitle.Text = Podcast.Title;
             //Kategorier
-            pbThumbnail.ImageLocation = _podcast.ImageUrl;
+            pbThumbnail.ImageLocation = Podcast.ImageUrl;
             pbThumbnail.SizeMode = PictureBoxSizeMode.StretchImage;
         }
     }
