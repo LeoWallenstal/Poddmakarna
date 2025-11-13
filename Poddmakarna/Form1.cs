@@ -10,12 +10,12 @@ namespace Poddmakarna
     public partial class Form1 : Form
     {
         private readonly MongoDbContext _dbContext;
-        private readonly PodRepository podcastRepo;
+        private readonly PodcastRepository podcastRepo;
         public Form1()
         {
             InitializeComponent();
             _dbContext = new MongoDbContext();
-            podcastRepo = new PodRepository(_dbContext.Database.GetCollection<Podcast>("Pods"));
+            //podcastRepo = new PodcastRepository(_dbContext.Database.GetCollection<Podcast>("Pods"));
         }
 
         private async void btnGetPodcast_Click(object sender, EventArgs e)

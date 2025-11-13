@@ -1,4 +1,5 @@
-﻿using DAL;
+﻿using BL;
+using DAL;
 using Models;
 using Services;
 using System;
@@ -15,14 +16,12 @@ namespace UI
 {
     public partial class Form2 : Form
     {
-        private readonly MongoDbContext _dbContext;
-        private readonly PodRepository _podRepo;
-        public Form2()
+        private readonly IPodService _podService;
+        public Form2(IPodService podService)
         {
             InitializeComponent();
             this.Load += LoadPodcast;
-            _dbContext = new MongoDbContext();
-            _podRepo = new PodRepository(_dbContext.Database.GetCollection<Podcast>("Pods"));
+            _podService = podService;
 
         }
 
@@ -31,7 +30,7 @@ namespace UI
             //RssReader rssReader = new RssReader();
             //Podcast? podcast = await rssReader.GetPodcastFromRssAsync("https://feed.pod.space/ursakta");
 
-            List<Podcast> allaPoddar = await _podRepo.GetAllAsync();
+            List<Podcast> allaPoddar = await _podService.GetAllAsync();
 
             foreach(Podcast pod in allaPoddar)
             {

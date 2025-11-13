@@ -1,4 +1,8 @@
+using BL;
+using DAL;
 using UI;
+using Models;
+using Services;
 
 namespace Poddmakarna
 {
@@ -13,7 +17,14 @@ namespace Poddmakarna
             // To customize application configuration such as set high DPI settings or default font,
             // see https://aka.ms/applicationconfiguration.
             ApplicationConfiguration.Initialize();
-            Application.Run(new Form2());
+
+            //Wiring
+            MongoDbContext _dbContext = new MongoDbContext();
+            PodcastRepository podRepo = new PodcastRepository(_dbContext.Database.GetCollection<Podcast>("Pods"), _dbContext.Client);
+            IRssReader rssReader = new RssReader();
+            IPodService podService = new PodcastService(podRepo, rssReader);
+
+            Application.Run(new Form2(podService));
         }
     }
 }

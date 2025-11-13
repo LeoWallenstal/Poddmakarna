@@ -20,12 +20,22 @@ namespace UI
             InitializeComponent();
             ClearLabels();
             LoadPodcast();
+
+            dgvEpisodes.CellMouseClick += (s, e) =>
+            {
+                if (e.RowIndex < 0) return;
+                Episode epClicked = podcast.Episodes.ElementAt(e.RowIndex);
+                ShowEpisode(epClicked);
+            };
+
+            //Nånting med att trolla bort carets på RichTextBoxes som är readonly
+            //Just nu har rtbPodDesc och rtbEpDesc en 'I'-caret
         }
 
         private void ClearLabels()
         {
             lblEpDate.Text = "";
-            lblEpDesc.Text = "";
+            rtbEpDesc.Text = "";
             lblEpTitle.Text = "";
         }
 
@@ -36,11 +46,17 @@ namespace UI
             pbThumbnail.ImageLocation = _podcast.ImageUrl;
             pbThumbnail.SizeMode = PictureBoxSizeMode.StretchImage;
 
+            dgvEpisodes.AutoGenerateColumns = false;
+            dgvEpisodes.DataSource = _podcast.Episodes;
+
+            ShowEpisode(_podcast.Episodes.First());
         }
 
-        private void label1_Click(object sender, EventArgs e)
+        private void ShowEpisode(Episode anEpisode)
         {
-
+            lblEpTitle.Text = anEpisode.Title;
+            rtbEpDesc.Text = anEpisode.Description;
+            lblEpDate.Text = anEpisode.PublishedDate;
         }
     }
 }
