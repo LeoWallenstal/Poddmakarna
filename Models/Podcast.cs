@@ -13,6 +13,9 @@ namespace Models
     {
         //Id from BaseEntity
         public string Title { get; set; } //Validering i setters
+        
+        //Sätts av användaren, om de vill
+        public string? CustomTitle { get; set; }
         public string Description { get; set; }
         public string Publisher { get; set; }
         public string ImageUrl { get; set; }

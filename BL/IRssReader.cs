@@ -10,6 +10,7 @@ namespace Services
 {
     public interface IRssReader
     {
-        public Task<Podcast?> GetPodcastFromRssAsync(string rssUrl);
+        Task<Podcast?> GetPodcastFromRssAsync(string rssUrl);
+        Task<List<Episode>> FetchEpisodesFromRssAsync(SyndicationFeed rssFeed);
     }
 }
