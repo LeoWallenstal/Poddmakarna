@@ -23,6 +23,7 @@ namespace UI
         private readonly ICategoryService _categoryService;
         private Podcast selectedPodcast;
 
+
         //DEBUG
         private readonly List<string> podcastUrls = new List<string>() {
             "https://feed.pod.space/krimrummet",
@@ -41,7 +42,16 @@ namespace UI
             InitializeComponent();
             this.Load += LoadPodcast;
             this.Load += InitCategories;
+
+        public Form2(IPodService podService, ICategoryService categoryService)
+        {
+            InitializeComponent();
+
             _podService = podService;
+            _categoryService = categoryService;
+
+            this.Load += LoadPodcast;
+            this.Load += LoadCategories;
             btnSave.Hide();
 
             //Debug
@@ -93,6 +103,12 @@ namespace UI
                     }
                 }
             };
+        }
+
+        private async void LoadCategories(object sender, EventArgs e) {
+            List<Category> allaKategorier = await _categoryService.GetAllAsync();
+            cbCategories.DisplayMember = "Text";
+            cbCategories.DataSource = allaKategorier;
         }
 
         private async void LoadPodcast(object sender, EventArgs e)

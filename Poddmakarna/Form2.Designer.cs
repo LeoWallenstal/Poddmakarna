@@ -72,7 +72,6 @@
             cbCategories.Name = "cbCategories";
             cbCategories.Size = new Size(227, 33);
             cbCategories.TabIndex = 3;
-            cbCategories.Text = "Välj Kategori...";
             // 
             // tbRssUrl
             // 

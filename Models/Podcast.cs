@@ -20,7 +20,9 @@ namespace Models
         public string Description { get; set; }
         public string Publisher { get; set; }
         public string ImageUrl { get; set; }
-        public ObjectId? Category { get; set; }
+
+        public ObjectId Category { get; set; }
+
         public List<Episode> Episodes { get; set; } = new();
         public string RssUrl { get; set; }
 
