@@ -40,18 +40,12 @@ namespace UI
         public Form2(IPodService podService, ICategoryService categoryService)
         {
             InitializeComponent();
-            this.Load += LoadPodcast;
-            this.Load += InitCategories;
-
-        public Form2(IPodService podService, ICategoryService categoryService)
-        {
-            InitializeComponent();
 
             _podService = podService;
             _categoryService = categoryService;
 
             this.Load += LoadPodcast;
-            this.Load += LoadCategories;
+            this.Load += InitCategories;
             btnSave.Hide();
 
             //Debug
@@ -103,12 +97,6 @@ namespace UI
                     }
                 }
             };
-        }
-
-        private async void LoadCategories(object sender, EventArgs e) {
-            List<Category> allaKategorier = await _categoryService.GetAllAsync();
-            cbCategories.DisplayMember = "Text";
-            cbCategories.DataSource = allaKategorier;
         }
 
         private async void LoadPodcast(object sender, EventArgs e)
