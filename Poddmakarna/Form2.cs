@@ -1,6 +1,7 @@
 ﻿using BL;
 using DAL;
 using Models;
+using MongoDB.Bson;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -19,6 +20,7 @@ namespace UI
     public partial class Form2 : Form
     {
         private readonly IPodService _podService;
+        private readonly ICategoryService _categoryService;
         private Podcast selectedPodcast;
 
         //DEBUG
@@ -34,15 +36,17 @@ namespace UI
             "https://rss.podplaystudio.com/1477.xml",
             "https://feed.pod.space/alexosigge"
         };
-        public Form2(IPodService podService)
+        public Form2(IPodService podService, ICategoryService categoryService)
         {
             InitializeComponent();
             this.Load += LoadPodcast;
+            this.Load += InitCategories;
             _podService = podService;
             btnSave.Hide();
 
             //Debug
             btnDebugFetchPods.MouseClick += LoadDebugPodcasts;
+            _categoryService = categoryService;
         }
 
         private async void LoadDebugPodcasts(object sender, EventArgs e) {
@@ -56,9 +60,39 @@ namespace UI
                 }
             }
             DisplayPodPanel(flpMyPods.Controls.OfType<PodCard>().ToList().FirstOrDefault().Podcast);
+        }
 
+        //Kanske 'async' i namnet...?? 
+        private async void InitCategories(object sender, EventArgs e) {
+            List<Category> allCategories = await _categoryService.GetAllAsync();
+            allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Kategorier" });
+            cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbCategories.DataSource = allCategories;
 
-             
+            cbCategories.SelectionChangeCommitted += async (s, e) =>
+            {
+                if (cbCategories.SelectedIndex == 0) {
+                    //Clear kanske ska sitta nån annanstans dåra
+                    flpMyPods.Controls.Clear();
+                    LoadPodcast(this, EventArgs.Empty);
+                }
+                else
+                {
+                    Category? selectedCategory = cbCategories.SelectedItem as Category;
+                    if (selectedCategory != null) {
+                        List<Podcast> sortedByCategory = await _podService.GetByCategoryAsync(selectedCategory.Id);
+
+                        flpMyPods.Controls.Clear();
+
+                        foreach (Podcast pod in sortedByCategory)
+                        {
+                            PodCard podCard = new PodCard(pod);
+                            flpMyPods.Controls.Add(podCard);
+                            podCard.MouseClick += PodCard_Clicked;
+                        }
+                    }
+                }
+            };
         }
 
         private async void LoadPodcast(object sender, EventArgs e)

@@ -6,6 +6,7 @@ using System.Text;
 using System.Threading.Tasks;
 using DAL;
 using Models;
+using MongoDB.Bson;
 using Services;
 
 namespace BL
@@ -23,9 +24,9 @@ namespace BL
             return await _rssReader.GetPodcastFromRssAsync(rssUrl);
         }
 
-        public Task<List<Podcast>> GetByCategoryAsync(string categoryId)
+        public async Task<List<Podcast>> GetByCategoryAsync(ObjectId categoryId)
         {
-            throw new NotImplementedException(); //Fixa senare : )
+            return await repository.GetByCategoryAsync(categoryId);
         }
 
         public async Task<bool> RssExistsAsync(string rssUrl)

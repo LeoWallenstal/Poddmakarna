@@ -31,7 +31,7 @@
             flpMyPods = new FlowLayoutPanel();
             pPodPanel = new Panel();
             lblMyPods = new Label();
-            comboBox1 = new ComboBox();
+            cbCategories = new ComboBox();
             tbRssUrl = new TextBox();
             btnGetRss = new Button();
             btnSave = new Button();
@@ -64,13 +64,15 @@
             lblMyPods.TabIndex = 2;
             lblMyPods.Text = "Mina Poddar";
             // 
-            // comboBox1
+            // cbCategories
             // 
-            comboBox1.FormattingEnabled = true;
-            comboBox1.Location = new Point(359, 53);
-            comboBox1.Name = "comboBox1";
-            comboBox1.Size = new Size(227, 33);
-            comboBox1.TabIndex = 3;
+            cbCategories.FormattingEnabled = true;
+            cbCategories.Items.AddRange(new object[] { "Alla Kategorier" });
+            cbCategories.Location = new Point(359, 53);
+            cbCategories.Name = "cbCategories";
+            cbCategories.Size = new Size(227, 33);
+            cbCategories.TabIndex = 3;
+            cbCategories.Text = "Välj Kategori...";
             // 
             // tbRssUrl
             // 
@@ -129,7 +131,7 @@
             Controls.Add(btnSave);
             Controls.Add(btnGetRss);
             Controls.Add(tbRssUrl);
-            Controls.Add(comboBox1);
+            Controls.Add(cbCategories);
             Controls.Add(lblMyPods);
             Controls.Add(pPodPanel);
             Controls.Add(flpMyPods);
@@ -144,7 +146,7 @@
         private FlowLayoutPanel flpMyPods;
         private Panel pPodPanel;
         private Label lblMyPods;
-        private ComboBox comboBox1;
+        private ComboBox cbCategories;
         private TextBox tbRssUrl;
         private Button btnGetRss;
         private Button btnSave;
