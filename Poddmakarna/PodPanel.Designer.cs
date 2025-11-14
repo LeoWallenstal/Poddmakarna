@@ -75,6 +75,7 @@
             rtbPodTitle.Size = new Size(420, 45);
             rtbPodTitle.TabIndex = 4;
             rtbPodTitle.Text = "Titel";
+            rtbPodTitle.Leave += rtbPodTitle_Leave;
             // 
             // dgvEpisodes
             // 

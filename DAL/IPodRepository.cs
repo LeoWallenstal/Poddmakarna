@@ -10,5 +10,6 @@ namespace DAL
     public interface IPodRepository : IRepository<Podcast>
     {
         Task<bool> RssExistsAsync(string rssUrl);
+        Task<bool> UpdateTitleAsync(Podcast podcast, string title);
     }
 }

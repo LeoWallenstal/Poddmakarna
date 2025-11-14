@@ -13,10 +13,17 @@ namespace UI
 {
     public partial class PodPanel : UserControl
     {
-        private readonly Podcast _podcast;
+        public Podcast Podcast { get; }
+        public string PodTitle
+        {
+            get { return rtbPodTitle.Text; }
+        } 
+
+        public event EventHandler OnTitleChanged;
+
         public PodPanel(Podcast podcast)
         {
-            _podcast = podcast;
+            Podcast = podcast;
             InitializeComponent();
             ClearLabels();
             LoadPodcast();
@@ -30,6 +37,8 @@ namespace UI
 
             //Nånting med att trolla bort carets på RichTextBoxes som är readonly
             //Just nu har rtbPodDesc och rtbEpDesc en 'I'-caret
+
+
         }
 
         private void ClearLabels()
@@ -41,15 +50,15 @@ namespace UI
 
         private void LoadPodcast()
         {
-            rtbPodTitle.Text = _podcast.Title;
-            rtbPodDesc.Text = _podcast.Description;
-            pbThumbnail.ImageLocation = _podcast.ImageUrl;
+            rtbPodTitle.Text = Podcast.Title;
+            rtbPodDesc.Text = Podcast.Description;
+            pbThumbnail.ImageLocation = Podcast.ImageUrl;
             pbThumbnail.SizeMode = PictureBoxSizeMode.StretchImage;
 
             dgvEpisodes.AutoGenerateColumns = false;
-            dgvEpisodes.DataSource = _podcast.Episodes;
+            dgvEpisodes.DataSource = Podcast.Episodes;
 
-            ShowEpisode(_podcast.Episodes.First());
+            ShowEpisode(Podcast.Episodes.First());
         }
 
         private void ShowEpisode(Episode anEpisode)
@@ -57,6 +66,19 @@ namespace UI
             lblEpTitle.Text = anEpisode.Title;
             rtbEpDesc.Text = anEpisode.Description;
             lblEpDate.Text = anEpisode.PublishedDate;
+        }
+
+        private void rtbPodTitle_Leave(object sender, EventArgs e)
+        {
+            if (string.IsNullOrWhiteSpace(rtbPodTitle.Text))
+            {
+                //If the RTB is empty, fallback to previous Title
+                rtbPodTitle.Text = Podcast.Title;
+            }
+            else if (rtbPodTitle.Text != Podcast.Title) {
+                Podcast.Title = rtbPodTitle.Text;
+                OnTitleChanged.Invoke(this, EventArgs.Empty);
+            }
         }
     }
 }

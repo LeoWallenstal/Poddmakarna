@@ -36,6 +36,7 @@
             btnGetRss = new Button();
             btnSave = new Button();
             btnDelete = new Button();
+            btnDebugFetchPods = new Button();
             SuspendLayout();
             // 
             // flpMyPods
@@ -109,11 +110,21 @@
             btnDelete.UseVisualStyleBackColor = true;
             btnDelete.Click += btnDelete_Click;
             // 
+            // btnDebugFetchPods
+            // 
+            btnDebugFetchPods.Location = new Point(19, 9);
+            btnDebugFetchPods.Name = "btnDebugFetchPods";
+            btnDebugFetchPods.Size = new Size(214, 34);
+            btnDebugFetchPods.TabIndex = 8;
+            btnDebugFetchPods.Text = "[Debug]Hämta Poddar";
+            btnDebugFetchPods.UseVisualStyleBackColor = true;
+            // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1518, 602);
+            Controls.Add(btnDebugFetchPods);
             Controls.Add(btnDelete);
             Controls.Add(btnSave);
             Controls.Add(btnGetRss);
@@ -138,5 +149,6 @@
         private Button btnGetRss;
         private Button btnSave;
         private Button btnDelete;
+        private Button btnDebugFetchPods;
     }
 }

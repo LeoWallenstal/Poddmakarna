@@ -15,6 +15,9 @@ namespace UI
     public partial class PodCard : UserControl
     {
         public Podcast Podcast { get; }
+        public Label TitleLabel {
+            get { return lblTitle; }
+        }
         public PodCard(Podcast podcast)
         {
             Podcast = podcast;

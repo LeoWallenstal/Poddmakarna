@@ -15,5 +15,6 @@ namespace BL
         Task<Podcast?> FetchPodFromRssAsync(string rssUrl);
 
         Task<bool> RssExistsAsync(string rssUrl);
+        Task<bool> UpdateTitleAsync(Podcast toUpdate, string newTitle);
     }
 }
