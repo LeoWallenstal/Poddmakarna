@@ -12,6 +12,8 @@ namespace BL
     public interface IPodService : IService<Podcast>
     {
         Task<List<Podcast>> GetByCategoryAsync(string categoryId);
-        Task<Podcast?> FetchPodFromRss(string rssUrl);
+        Task<Podcast?> FetchPodFromRssAsync(string rssUrl);
+
+        Task<bool> RssExistsAsync(string rssUrl);
     }
 }

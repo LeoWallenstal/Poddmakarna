@@ -8,11 +8,13 @@ using System.Threading.Tasks;
 
 namespace BL
 {
-    public abstract class EntityService<T> : IService<T> where T : BaseEntity
+    public abstract class EntityService<T, TRepository> : IService<T> 
+        where T : BaseEntity
+        where TRepository : IRepository<T>
     {
-        private readonly EntityRepository<T> repository;
+        protected readonly TRepository repository;
 
-        protected EntityService(EntityRepository<T> repository)
+        protected EntityService(TRepository repository)
         {
             this.repository = repository;
         }

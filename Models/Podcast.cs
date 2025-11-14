@@ -21,6 +21,7 @@ namespace Models
         public string ImageUrl { get; set; }
         public string Categories { get; set; }
         public List<Episode> Episodes { get; set; } = new();
+        public string RssUrl { get; set; }
 
         public Podcast() : base() { //Ska man ha flera konstruktorer här?? (MongoDB osv)
         

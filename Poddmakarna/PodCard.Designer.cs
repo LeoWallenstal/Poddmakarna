@@ -45,12 +45,13 @@
             // lblTitle
             // 
             lblTitle.AutoSize = true;
-            lblTitle.Font = new Font("Segoe UI Black", 16F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            lblTitle.Font = new Font("Arial", 16F, FontStyle.Regular, GraphicsUnit.Point, 0);
             lblTitle.Location = new Point(112, 10);
             lblTitle.Name = "lblTitle";
-            lblTitle.Size = new Size(91, 45);
+            lblTitle.Size = new Size(73, 36);
             lblTitle.TabIndex = 1;
             lblTitle.Text = "Titel";
+            lblTitle.UseMnemonic = false;
             // 
             // lblCategory
             // 
