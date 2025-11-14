@@ -8,7 +8,7 @@ using MongoDB.Driver;
 
 namespace DAL
 {
-    public class PodcastRepository : EntityRepository<Podcast>, IPodRepository//implementerar IPodRepository sen
+    public class PodcastRepository : EntityRepository<Podcast>, IPodRepository //implementerar IPodRepository sen
     {
         public PodcastRepository(IMongoCollection<Podcast> aCollection, MongoClient client) : base(aCollection, client){}
 
@@ -17,6 +17,15 @@ namespace DAL
             var filter = Builders<Podcast>.Filter.Eq(p => p.RssUrl, rssUrl);
             var count = await _collection.CountDocumentsAsync(filter);
             return count > 0;
+        }
+
+        public async Task<bool> UpdateTitleAsync(Podcast podcast, string newTitle)
+        {
+            var filter = Builders<Podcast>.Filter.Eq(p => p.RssUrl, podcast.RssUrl);
+            var update = Builders<Podcast>.Update.Set(p => p.Title, newTitle);
+            var result = await _collection.UpdateOneAsync(filter, update);
+
+            return result.MatchedCount > 0 || result.ModifiedCount > 0;
         }
     }
 }
