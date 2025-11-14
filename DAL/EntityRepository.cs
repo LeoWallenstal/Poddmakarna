@@ -10,8 +10,8 @@ namespace DAL
 {
     public abstract class EntityRepository<T> : IRepository<T> where T : BaseEntity
     {
-        private readonly IMongoCollection<T> _collection;
-        private readonly MongoClient _client;
+        protected readonly IMongoCollection<T> _collection;
+        protected readonly MongoClient _client;
         protected EntityRepository(IMongoCollection<T> aCollection, MongoClient client)
         {
             _collection = aCollection;

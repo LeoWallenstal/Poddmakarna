@@ -28,6 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
+            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
             pbThumbnail = new PictureBox();
             rtbPodDesc = new RichTextBox();
             rtbPodTitle = new RichTextBox();
@@ -36,6 +37,8 @@
             lblEpTitle = new Label();
             lblEpDate = new Label();
             rtbEpDesc = new RichTextBox();
+            cbCategory = new ComboBox();
+            lblCategory = new Label();
             ((System.ComponentModel.ISupportInitialize)pbThumbnail).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvEpisodes).BeginInit();
             SuspendLayout();
@@ -67,8 +70,9 @@
             rtbPodTitle.Cursor = Cursors.Hand;
             rtbPodTitle.Font = new Font("Segoe UI", 16F, FontStyle.Regular, GraphicsUnit.Point, 0);
             rtbPodTitle.Location = new Point(159, 3);
+            rtbPodTitle.Multiline = false;
             rtbPodTitle.Name = "rtbPodTitle";
-            rtbPodTitle.Size = new Size(698, 45);
+            rtbPodTitle.Size = new Size(420, 45);
             rtbPodTitle.TabIndex = 4;
             rtbPodTitle.Text = "Titel";
             // 
@@ -80,16 +84,24 @@
             dgvEpisodes.AllowUserToResizeRows = false;
             dgvEpisodes.BackgroundColor = SystemColors.Menu;
             dgvEpisodes.BorderStyle = BorderStyle.None;
+            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle1.BackColor = SystemColors.Control;
+            dataGridViewCellStyle1.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
+            dgvEpisodes.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
             dgvEpisodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvEpisodes.Columns.AddRange(new DataGridViewColumn[] { colTitle });
             dgvEpisodes.Cursor = Cursors.Hand;
-            dgvEpisodes.Location = new Point(3, 159);
+            dgvEpisodes.Location = new Point(3, 196);
             dgvEpisodes.MultiSelect = false;
             dgvEpisodes.Name = "dgvEpisodes";
             dgvEpisodes.ReadOnly = true;
             dgvEpisodes.RowHeadersVisible = false;
             dgvEpisodes.RowHeadersWidth = 62;
-            dgvEpisodes.Size = new Size(459, 298);
+            dgvEpisodes.Size = new Size(459, 256);
             dgvEpisodes.TabIndex = 5;
             // 
             // colTitle
@@ -106,17 +118,18 @@
             // lblEpTitle
             // 
             lblEpTitle.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblEpTitle.Location = new Point(468, 159);
+            lblEpTitle.Location = new Point(468, 196);
             lblEpTitle.Name = "lblEpTitle";
             lblEpTitle.Size = new Size(409, 32);
             lblEpTitle.TabIndex = 6;
             lblEpTitle.Text = "Titel på avsnitt";
+            lblEpTitle.UseMnemonic = false;
             // 
             // lblEpDate
             // 
             lblEpDate.AutoSize = true;
             lblEpDate.Font = new Font("Segoe UI", 9F, FontStyle.Italic, GraphicsUnit.Point, 0);
-            lblEpDate.Location = new Point(468, 196);
+            lblEpDate.Location = new Point(468, 233);
             lblEpDate.Name = "lblEpDate";
             lblEpDate.Size = new Size(106, 25);
             lblEpDate.TabIndex = 7;
@@ -126,18 +139,37 @@
             // 
             rtbEpDesc.BackColor = SystemColors.Menu;
             rtbEpDesc.BorderStyle = BorderStyle.None;
-            rtbEpDesc.Location = new Point(468, 224);
+            rtbEpDesc.Location = new Point(468, 261);
             rtbEpDesc.Name = "rtbEpDesc";
             rtbEpDesc.ReadOnly = true;
-            rtbEpDesc.Size = new Size(384, 228);
+            rtbEpDesc.Size = new Size(392, 191);
             rtbEpDesc.TabIndex = 9;
             rtbEpDesc.TabStop = false;
             rtbEpDesc.Text = "";
+            // 
+            // cbCategory
+            // 
+            cbCategory.FormattingEnabled = true;
+            cbCategory.Location = new Point(87, 159);
+            cbCategory.Name = "cbCategory";
+            cbCategory.Size = new Size(207, 33);
+            cbCategory.TabIndex = 10;
+            // 
+            // lblCategory
+            // 
+            lblCategory.AutoSize = true;
+            lblCategory.Location = new Point(3, 165);
+            lblCategory.Name = "lblCategory";
+            lblCategory.Size = new Size(78, 25);
+            lblCategory.TabIndex = 11;
+            lblCategory.Text = "Kategori";
             // 
             // PodPanel
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(lblCategory);
+            Controls.Add(cbCategory);
             Controls.Add(rtbEpDesc);
             Controls.Add(lblEpDate);
             Controls.Add(lblEpTitle);
@@ -164,5 +196,7 @@
         private Label lblEpDate;
         private DataGridViewTextBoxColumn colTitle;
         private RichTextBox rtbEpDesc;
+        private ComboBox cbCategory;
+        private Label lblCategory;
     }
 }

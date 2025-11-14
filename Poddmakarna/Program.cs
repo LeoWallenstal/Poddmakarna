@@ -20,7 +20,7 @@ namespace Poddmakarna
 
             //Wiring
             MongoDbContext _dbContext = new MongoDbContext();
-            PodcastRepository podRepo = new PodcastRepository(_dbContext.Database.GetCollection<Podcast>("Pods"), _dbContext.Client);
+            IPodRepository podRepo = new PodcastRepository(_dbContext.Database.GetCollection<Podcast>("Pods"), _dbContext.Client);
             IRssReader rssReader = new RssReader();
             IPodService podService = new PodcastService(podRepo, rssReader);
 

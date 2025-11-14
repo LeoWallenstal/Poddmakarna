@@ -32,7 +32,8 @@ namespace UI
 
         private void LoadPodCard()
         {
-            lblTitle.Text = Podcast.Title;
+            lblTitle.Text = $"{Podcast.Title}";
+            Debug.WriteLine("Loading PodCard for podcast: " + Podcast.Title);
             //Kategorier
             pbThumbnail.ImageLocation = Podcast.ImageUrl;
             pbThumbnail.SizeMode = PictureBoxSizeMode.StretchImage;
