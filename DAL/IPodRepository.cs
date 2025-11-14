@@ -1,4 +1,5 @@
 ﻿using Models;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -11,5 +12,7 @@ namespace DAL
     {
         Task<bool> RssExistsAsync(string rssUrl);
         Task<bool> UpdateTitleAsync(Podcast podcast, string title);
+
+        Task<List<Podcast>> GetByCategoryAsync(ObjectId categoryId);
     }
 }

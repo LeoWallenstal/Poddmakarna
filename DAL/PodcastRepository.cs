@@ -4,13 +4,15 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using Models;
+using MongoDB.Bson;
 using MongoDB.Driver;
 
 namespace DAL
 {
     public class PodcastRepository : EntityRepository<Podcast>, IPodRepository //implementerar IPodRepository sen
     {
-        public PodcastRepository(IMongoCollection<Podcast> aCollection, MongoClient client) : base(aCollection, client){}
+        public PodcastRepository(IMongoCollection<Podcast> aCollection, MongoClient client) 
+            : base(aCollection, client){}
 
         public async Task<bool> RssExistsAsync(string rssUrl)
         {
@@ -26,6 +28,11 @@ namespace DAL
             var result = await _collection.UpdateOneAsync(filter, update);
 
             return result.MatchedCount > 0 || result.ModifiedCount > 0;
+        }
+
+        public async Task<List<Podcast>> GetByCategoryAsync(ObjectId categoryId) {
+            var filter = Builders<Podcast>.Filter.Eq(p => p.Category, categoryId);
+            return await _collection.Find(filter).ToListAsync();
         }
     }
 }

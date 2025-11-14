@@ -24,7 +24,10 @@ namespace Poddmakarna
             IRssReader rssReader = new RssReader();
             IPodService podService = new PodcastService(podRepo, rssReader);
 
-            Application.Run(new Form2(podService));
+            ICategoryRepository categoryRepo = new CategoryRepository(_dbContext.Database.GetCollection<Category>("Categories"), _dbContext.Client);
+            ICategoryService categoryService = new CategoryService(categoryRepo);
+
+            Application.Run(new Form2(podService, categoryService));
         }
     }
 }
