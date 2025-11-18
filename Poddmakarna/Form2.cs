@@ -24,6 +24,7 @@ namespace UI
         private readonly ICategoryService _categoryService;
         private Dictionary<ObjectId, Category> categoryDict = new Dictionary<ObjectId, Category>();
         private Podcast selectedPodcast;
+        private BindingList<Category> _categories;
 
 
         //DEBUG
@@ -52,8 +53,25 @@ namespace UI
 
             CategoryPanel categoryPanel = new CategoryPanel(categoryService);
 
+            categoryPanel.OnCategoryAdded += (aCategory) => {
+                categoryDict.Add(aCategory.Id, aCategory);
+                _categories.Add(aCategory);
+                //DB delete
+            };
+            categoryPanel.OnCategoryRemoved += (aCategory) => { 
+                categoryDict.Remove(aCategory.Id);
+                _categories.Remove(aCategory);
+                //DB delete
+            };
+            categoryPanel.OnCategoryChanged += (changedCategory) =>
+            {
+                //Jag antar att den skriver över existerande värde här
+                categoryDict.Add(changedCategory.Id, changedCategory);
+                //VILKEN SKA JAG ÄNDRA????????????????? ses imorrn
+            };
 
-            pCategoryPanel.Controls.Add);
+
+            pCategoryPanel.Controls.Add(categoryPanel);
 
             //Debug
             btnDebugFetchPods.MouseClick += LoadDebugPodcasts;
@@ -86,13 +104,15 @@ namespace UI
         //Kanske 'async' i namnet...?? 
         private async void InitCategories(object sender, EventArgs e) {
             List<Category> allCategories = await _categoryService.GetAllAsync();
+            _categories = new BindingList<Category>(allCategories);
+
             foreach (Category category in allCategories) {
                 categoryDict[category.Id] = category;
             }
 
             allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Poddar" });
             cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
-            cbCategories.DataSource = allCategories;
+            cbCategories.DataSource = _categories;
 
             cbCategories.SelectionChangeCommitted += async (s, e) =>
             {

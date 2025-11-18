@@ -15,7 +15,10 @@ namespace UI
 {
     public partial class CategoryPanel : UserControl
     {
-        public event EventHandler OnCategoryAdded;
+        public event Action<Category> OnCategoryAdded;
+        public event Action<Category> OnCategoryRemoved;
+        public event Action<Category> OnCategoryChanged;
+
 
         private readonly ICategoryService categoryService;
         private BindingList<Category> _categories;
@@ -63,6 +66,8 @@ namespace UI
             {
                 categoryService.DeleteAsync(currentCategory);
                 _categories.Remove(currentCategory);
+
+                OnCategoryRemoved(currentCategory);
             }
         }
 
@@ -100,7 +105,9 @@ namespace UI
 
                 //Add to DB
                 await categoryService.InsertAsync(aCategory);
-                OnCategoryAdded?.Invoke(aCategory, EventArgs.Empty);
+
+                //Raise event to subscribers
+                OnCategoryAdded?.Invoke(aCategory);
             }
         }
 
@@ -131,6 +138,7 @@ namespace UI
             }
             if (_originalCategoryText != editedCategory.Text)
             {
+                OnCategoryChanged(editedCategory);
                 await categoryService.ReplaceAsync(editedCategory);
             }
         }
