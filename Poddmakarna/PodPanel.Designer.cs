@@ -34,11 +34,12 @@
             rtbPodTitle = new RichTextBox();
             dgvEpisodes = new DataGridView();
             colTitle = new DataGridViewTextBoxColumn();
-            lblEpTitle = new Label();
             lblEpDate = new Label();
             rtbEpDesc = new RichTextBox();
             cbCategory = new ComboBox();
             lblCategory = new Label();
+            lblEpDuration = new Label();
+            lblEpTitle = new Label();
             ((System.ComponentModel.ISupportInitialize)pbThumbnail).BeginInit();
             ((System.ComponentModel.ISupportInitialize)dgvEpisodes).BeginInit();
             SuspendLayout();
@@ -96,13 +97,13 @@
             dgvEpisodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvEpisodes.Columns.AddRange(new DataGridViewColumn[] { colTitle });
             dgvEpisodes.Cursor = Cursors.Hand;
-            dgvEpisodes.Location = new Point(3, 196);
+            dgvEpisodes.Location = new Point(8, 196);
             dgvEpisodes.MultiSelect = false;
             dgvEpisodes.Name = "dgvEpisodes";
             dgvEpisodes.ReadOnly = true;
             dgvEpisodes.RowHeadersVisible = false;
             dgvEpisodes.RowHeadersWidth = 62;
-            dgvEpisodes.Size = new Size(459, 256);
+            dgvEpisodes.Size = new Size(584, 256);
             dgvEpisodes.TabIndex = 5;
             // 
             // colTitle
@@ -116,21 +117,11 @@
             colTitle.Resizable = DataGridViewTriState.False;
             colTitle.SortMode = DataGridViewColumnSortMode.NotSortable;
             // 
-            // lblEpTitle
-            // 
-            lblEpTitle.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
-            lblEpTitle.Location = new Point(468, 196);
-            lblEpTitle.Name = "lblEpTitle";
-            lblEpTitle.Size = new Size(409, 32);
-            lblEpTitle.TabIndex = 6;
-            lblEpTitle.Text = "Titel på avsnitt";
-            lblEpTitle.UseMnemonic = false;
-            // 
             // lblEpDate
             // 
             lblEpDate.AutoSize = true;
             lblEpDate.Font = new Font("Segoe UI", 9F, FontStyle.Italic, GraphicsUnit.Point, 0);
-            lblEpDate.Location = new Point(468, 233);
+            lblEpDate.Location = new Point(598, 275);
             lblEpDate.Name = "lblEpDate";
             lblEpDate.Size = new Size(106, 25);
             lblEpDate.TabIndex = 7;
@@ -140,10 +131,10 @@
             // 
             rtbEpDesc.BackColor = SystemColors.Menu;
             rtbEpDesc.BorderStyle = BorderStyle.None;
-            rtbEpDesc.Location = new Point(468, 261);
+            rtbEpDesc.Location = new Point(598, 303);
             rtbEpDesc.Name = "rtbEpDesc";
             rtbEpDesc.ReadOnly = true;
-            rtbEpDesc.Size = new Size(392, 191);
+            rtbEpDesc.Size = new Size(495, 149);
             rtbEpDesc.TabIndex = 9;
             rtbEpDesc.TabStop = false;
             rtbEpDesc.Text = "";
@@ -165,22 +156,42 @@
             lblCategory.TabIndex = 11;
             lblCategory.Text = "Kategori";
             // 
+            // lblEpDuration
+            // 
+            lblEpDuration.AutoSize = true;
+            lblEpDuration.Font = new Font("Segoe UI", 9F, FontStyle.Italic, GraphicsUnit.Point, 0);
+            lblEpDuration.Location = new Point(784, 275);
+            lblEpDuration.Name = "lblEpDuration";
+            lblEpDuration.Size = new Size(138, 25);
+            lblEpDuration.TabIndex = 12;
+            lblEpDuration.Text = "Avsnittets längd";
+            // 
+            // lblEpTitle
+            // 
+            lblEpTitle.Font = new Font("Segoe UI", 12F, FontStyle.Regular, GraphicsUnit.Point, 0);
+            lblEpTitle.Location = new Point(598, 196);
+            lblEpTitle.Name = "lblEpTitle";
+            lblEpTitle.Size = new Size(650, 65);
+            lblEpTitle.TabIndex = 13;
+            lblEpTitle.Text = "Titel på avsnitt";
+            // 
             // PodPanel
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
+            Controls.Add(lblEpTitle);
+            Controls.Add(lblEpDuration);
             Controls.Add(lblCategory);
             Controls.Add(cbCategory);
             Controls.Add(rtbEpDesc);
             Controls.Add(lblEpDate);
-            Controls.Add(lblEpTitle);
             Controls.Add(dgvEpisodes);
             Controls.Add(rtbPodTitle);
             Controls.Add(rtbPodDesc);
             Controls.Add(pbThumbnail);
             Name = "PodPanel";
             Padding = new Padding(5);
-            Size = new Size(860, 460);
+            Size = new Size(1272, 460);
             ((System.ComponentModel.ISupportInitialize)pbThumbnail).EndInit();
             ((System.ComponentModel.ISupportInitialize)dgvEpisodes).EndInit();
             ResumeLayout(false);
@@ -193,11 +204,13 @@
         private RichTextBox rtbPodDesc;
         private RichTextBox rtbPodTitle;
         private DataGridView dgvEpisodes;
-        private Label lblEpTitle;
         private Label lblEpDate;
         private DataGridViewTextBoxColumn colTitle;
         private RichTextBox rtbEpDesc;
         private ComboBox cbCategory;
         private Label lblCategory;
+        private Label lblEpDuration;
+        private RichTextBox rtbEpTitle;
+        private Label lblEpTitle;
     }
 }
