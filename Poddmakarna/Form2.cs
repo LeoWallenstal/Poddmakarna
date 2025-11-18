@@ -10,6 +10,7 @@ using System.Data;
 using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
+using System.Security.AccessControl;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
@@ -48,11 +49,15 @@ namespace UI
             this.Load += InitCategories;
             btnSave.Hide();
 
+            pCategoryPanel.Controls.Add(new CategoryPanel(categoryService));
+
             //Debug
             btnDebugFetchPods.MouseClick += LoadDebugPodcasts;
-            _categoryService = categoryService;
+            btnDebugRemovePodcasts.MouseClick += RemoveDebugPodcasts;
+            //Debug
         }
 
+        //DEBUG
         private async void LoadDebugPodcasts(object sender, EventArgs e) {
             foreach (string url in podcastUrls)
             {
@@ -66,6 +71,14 @@ namespace UI
             DisplayPodPanel(flpMyPods.Controls.OfType<PodCard>().ToList().FirstOrDefault().Podcast);
         }
 
+        //DEBUG
+        private async void RemoveDebugPodcasts(object sender, EventArgs e) {
+            foreach (PodCard podcard in flpMyPods.Controls) {
+                await _podService.DeleteAsync(podcard.Podcast);
+                flpMyPods.Controls.Remove(podcard);
+            }
+        }
+
         //Kanske 'async' i namnet...?? 
         private async void InitCategories(object sender, EventArgs e) {
             List<Category> allCategories = await _categoryService.GetAllAsync();
@@ -75,6 +88,7 @@ namespace UI
 
             cbCategories.SelectionChangeCommitted += async (s, e) =>
             {
+                Debug.WriteLine("SelectionChangeCommitted!");
                 if (cbCategories.SelectedIndex == 0) {
                     //Clear kanske ska sitta nån annanstans dåra
                     flpMyPods.Controls.Clear();

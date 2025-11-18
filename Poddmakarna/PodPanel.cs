@@ -17,7 +17,7 @@ namespace UI
         public string PodTitle
         {
             get { return rtbPodTitle.Text; }
-        } 
+        }
 
         public event EventHandler OnTitleChanged;
 
@@ -46,6 +46,7 @@ namespace UI
             lblEpDate.Text = "";
             rtbEpDesc.Text = "";
             lblEpTitle.Text = "";
+            lblEpDuration.Text = "";
         }
 
         private void LoadPodcast()
@@ -66,6 +67,7 @@ namespace UI
             lblEpTitle.Text = anEpisode.Title;
             rtbEpDesc.Text = anEpisode.Description;
             lblEpDate.Text = anEpisode.PublishedDate;
+            lblEpDuration.Text = anEpisode.Duration;
         }
 
         private void rtbPodTitle_Leave(object sender, EventArgs e)
@@ -75,7 +77,8 @@ namespace UI
                 //If the RTB is empty, fallback to previous Title
                 rtbPodTitle.Text = Podcast.Title;
             }
-            else if (rtbPodTitle.Text != Podcast.Title) {
+            else if (rtbPodTitle.Text != Podcast.Title)
+            {
                 Podcast.Title = rtbPodTitle.Text;
                 OnTitleChanged.Invoke(this, EventArgs.Empty);
             }

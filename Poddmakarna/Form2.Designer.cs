@@ -37,6 +37,8 @@
             btnSave = new Button();
             btnDelete = new Button();
             btnDebugFetchPods = new Button();
+            pCategoryPanel = new Panel();
+            btnDebugRemovePodcasts = new Button();
             SuspendLayout();
             // 
             // flpMyPods
@@ -44,14 +46,14 @@
             flpMyPods.AutoScroll = true;
             flpMyPods.Location = new Point(12, 94);
             flpMyPods.Name = "flpMyPods";
-            flpMyPods.Size = new Size(574, 460);
+            flpMyPods.Size = new Size(574, 833);
             flpMyPods.TabIndex = 0;
             // 
             // pPodPanel
             // 
-            pPodPanel.Location = new Point(609, 94);
+            pPodPanel.Location = new Point(609, 127);
             pPodPanel.Name = "pPodPanel";
-            pPodPanel.Size = new Size(860, 460);
+            pPodPanel.Size = new Size(1272, 460);
             pPodPanel.TabIndex = 1;
             // 
             // lblMyPods
@@ -75,7 +77,7 @@
             // 
             // tbRssUrl
             // 
-            tbRssUrl.Location = new Point(1061, 57);
+            tbRssUrl.Location = new Point(1473, 53);
             tbRssUrl.Name = "tbRssUrl";
             tbRssUrl.PlaceholderText = "Hämta rss url";
             tbRssUrl.Size = new Size(290, 31);
@@ -83,7 +85,7 @@
             // 
             // btnGetRss
             // 
-            btnGetRss.Location = new Point(1357, 57);
+            btnGetRss.Location = new Point(1769, 53);
             btnGetRss.Name = "btnGetRss";
             btnGetRss.Size = new Size(112, 31);
             btnGetRss.TabIndex = 5;
@@ -93,7 +95,7 @@
             // 
             // btnSave
             // 
-            btnSave.Location = new Point(1357, 560);
+            btnSave.Location = new Point(609, 87);
             btnSave.Name = "btnSave";
             btnSave.Size = new Size(112, 34);
             btnSave.TabIndex = 6;
@@ -103,7 +105,7 @@
             // 
             // btnDelete
             // 
-            btnDelete.Location = new Point(1357, 560);
+            btnDelete.Location = new Point(609, 87);
             btnDelete.Name = "btnDelete";
             btnDelete.Size = new Size(112, 34);
             btnDelete.TabIndex = 7;
@@ -120,11 +122,29 @@
             btnDebugFetchPods.Text = "[Debug]Hämta Poddar";
             btnDebugFetchPods.UseVisualStyleBackColor = true;
             // 
+            // pCategoryPanel
+            // 
+            pCategoryPanel.Location = new Point(609, 593);
+            pCategoryPanel.Name = "pCategoryPanel";
+            pCategoryPanel.Size = new Size(450, 334);
+            pCategoryPanel.TabIndex = 9;
+            // 
+            // btnDebugRemovePodcasts
+            // 
+            btnDebugRemovePodcasts.Location = new Point(239, 9);
+            btnDebugRemovePodcasts.Name = "btnDebugRemovePodcasts";
+            btnDebugRemovePodcasts.Size = new Size(243, 34);
+            btnDebugRemovePodcasts.TabIndex = 10;
+            btnDebugRemovePodcasts.Text = "[Debug] Ta bort alla poddar";
+            btnDebugRemovePodcasts.UseVisualStyleBackColor = true;
+            // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1518, 602);
+            ClientSize = new Size(1898, 939);
+            Controls.Add(btnDebugRemovePodcasts);
+            Controls.Add(pCategoryPanel);
             Controls.Add(btnDebugFetchPods);
             Controls.Add(btnDelete);
             Controls.Add(btnSave);
@@ -135,7 +155,7 @@
             Controls.Add(pPodPanel);
             Controls.Add(flpMyPods);
             Name = "Form2";
-            Text = "Form2";
+            Text = "Poddmakarna";
             ResumeLayout(false);
             PerformLayout();
         }
@@ -151,5 +171,7 @@
         private Button btnSave;
         private Button btnDelete;
         private Button btnDebugFetchPods;
+        private Panel pCategoryPanel;
+        private Button btnDebugRemovePodcasts;
     }
 }
