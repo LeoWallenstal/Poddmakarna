@@ -1,4 +1,5 @@
 ﻿using Models;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -20,13 +21,18 @@ namespace UI
         }
 
         public event EventHandler OnTitleChanged;
+        public event EventHandler OnCategoryChanged;
 
-        public PodPanel(Podcast podcast)
+        private Dictionary<ObjectId, Category> _categoryDict;
+
+        public PodPanel(Podcast podcast, Dictionary<ObjectId, Category> categoryDict)
         {
             Podcast = podcast;
+            _categoryDict = categoryDict;
             InitializeComponent();
             ClearLabels();
             LoadPodcast();
+            LoadCategories();
 
             dgvEpisodes.CellMouseClick += (s, e) =>
             {
@@ -60,6 +66,34 @@ namespace UI
             dgvEpisodes.DataSource = Podcast.Episodes;
 
             ShowEpisode(Podcast.Episodes.First());
+        }
+
+        private void LoadCategories()
+        {
+            cbCategories.Items.Clear();
+            foreach (var category in _categoryDict.Values)
+            {
+                cbCategories.Items.Add(category);
+            }
+            if (Podcast.Category != ObjectId.Empty && _categoryDict.ContainsKey(Podcast.Category))
+            {
+                cbCategories.SelectedItem = _categoryDict[Podcast.Category];
+            }
+            else
+            {
+                cbCategories.SelectedIndex = -1; //No selection
+            }
+            cbCategories.SelectedIndexChanged += (s, e) =>
+            {
+                if (cbCategories.SelectedItem is Category selectedCategory)
+                {
+                    if (Podcast.Category != selectedCategory.Id)
+                    {
+                        Podcast.Category = selectedCategory.Id;
+                        OnCategoryChanged?.Invoke(this, EventArgs.Empty);
+                    }
+                }
+            };
         }
 
         private void ShowEpisode(Episode anEpisode)

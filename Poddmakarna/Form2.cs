@@ -22,6 +22,7 @@ namespace UI
     {
         private readonly IPodService _podService;
         private readonly ICategoryService _categoryService;
+        private Dictionary<ObjectId, Category> categoryDict = new Dictionary<ObjectId, Category>();
         private Podcast selectedPodcast;
 
 
@@ -49,7 +50,10 @@ namespace UI
             this.Load += InitCategories;
             btnSave.Hide();
 
-            pCategoryPanel.Controls.Add(new CategoryPanel(categoryService));
+            CategoryPanel categoryPanel = new CategoryPanel(categoryService);
+
+
+            pCategoryPanel.Controls.Add);
 
             //Debug
             btnDebugFetchPods.MouseClick += LoadDebugPodcasts;
@@ -82,7 +86,11 @@ namespace UI
         //Kanske 'async' i namnet...?? 
         private async void InitCategories(object sender, EventArgs e) {
             List<Category> allCategories = await _categoryService.GetAllAsync();
-            allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Kategorier" });
+            foreach (Category category in allCategories) {
+                categoryDict[category.Id] = category;
+            }
+
+            allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Poddar" });
             cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
             cbCategories.DataSource = allCategories;
 
@@ -120,6 +128,12 @@ namespace UI
             foreach (Podcast pod in allaPoddar)
             {
                 PodCard podCard = new PodCard(pod);
+                string category = "";
+                if (pod.Category != ObjectId.Empty)
+                {
+                    category = categoryDict[pod.Category].Text;
+                }
+                podCard.SetCategoryText(category);
                 flpMyPods.Controls.Add(podCard);
                 podCard.MouseClick += PodCard_Clicked;
             }
@@ -139,7 +153,7 @@ namespace UI
 
         private async void DisplayPodPanel(Podcast podcast)
         {
-            PodPanel toShow = new PodPanel(podcast);
+            PodPanel toShow = new PodPanel(podcast, categoryDict);
             pPodPanel.Controls.Clear();
             pPodPanel.Controls.Add(toShow);
             toShow.OnTitleChanged += ReflectTitleChange;
