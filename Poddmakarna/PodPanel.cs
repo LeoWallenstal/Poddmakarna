@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -21,14 +22,17 @@ namespace UI
         }
 
         public event EventHandler OnTitleChanged;
-        public event EventHandler OnCategoryChanged;
+        public event Action<Podcast> OnCategoryChanged;
 
-        private Dictionary<ObjectId, Category> _categoryDict;
+        //private Dictionary<ObjectId, Category> _categoryDict;
+        private BindingList<Category> categoryDataSource; //Bound with Form2 ComboBox-source
 
-        public PodPanel(Podcast podcast, Dictionary<ObjectId, Category> categoryDict)
+        public PodPanel(Podcast podcast, BindingList<Category> dataSource)
         {
             Podcast = podcast;
-            _categoryDict = categoryDict;
+            categoryDataSource = new BindingList<Category>();
+            UpdateDataSource(dataSource);
+
             InitializeComponent();
             ClearLabels();
             LoadPodcast();
@@ -43,8 +47,21 @@ namespace UI
 
             //Nånting med att trolla bort carets på RichTextBoxes som är readonly
             //Just nu har rtbPodDesc och rtbEpDesc en 'I'-caret
+        }
 
+        public void UpdateComboBoxSelection() { 
+            cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == Podcast.Category);
+        }
 
+        public void UpdateDataSource(BindingList<Category> listToCopy) {
+            BindingList<Category> copy = new BindingList<Category>(
+                listToCopy.Select(c => new Category {
+                     Id = c.Id,
+                     Text = c.Text
+                 }).ToList());
+            categoryDataSource = copy;
+            categoryDataSource[0].Text = "Okategoriserad"; //Fixar dummy itemet som ligger först
+            categoryDataSource.ResetBindings();
         }
 
         private void ClearLabels()
@@ -71,18 +88,13 @@ namespace UI
         private void LoadCategories()
         {
             cbCategories.Items.Clear();
-            foreach (var category in _categoryDict.Values)
+            cbCategories.DataSource = categoryDataSource;
+            if (categoryDataSource.Any(c => c.Id == Podcast.Category))
             {
-                cbCategories.Items.Add(category);
+                cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == Podcast.Category);
             }
-            if (Podcast.Category != ObjectId.Empty && _categoryDict.ContainsKey(Podcast.Category))
-            {
-                cbCategories.SelectedItem = _categoryDict[Podcast.Category];
-            }
-            else
-            {
-                cbCategories.SelectedIndex = -1; //No selection
-            }
+
+            //Hanterar ändring av kategori på en podcast
             cbCategories.SelectedIndexChanged += (s, e) =>
             {
                 if (cbCategories.SelectedItem is Category selectedCategory)
@@ -90,7 +102,7 @@ namespace UI
                     if (Podcast.Category != selectedCategory.Id)
                     {
                         Podcast.Category = selectedCategory.Id;
-                        OnCategoryChanged?.Invoke(this, EventArgs.Empty);
+                        OnCategoryChanged(Podcast);
                     }
                 }
             };

@@ -17,7 +17,7 @@ namespace UI
     {
         public event Action<Category> OnCategoryAdded;
         public event Action<Category> OnCategoryRemoved;
-        public event Action<Category> OnCategoryChanged;
+        public event Action<Category> OnCategoryTextChanged;
 
 
         private readonly ICategoryService categoryService;
@@ -101,9 +101,6 @@ namespace UI
                 //Add to UI
                 _categories.Add(aCategory);
 
-                //Add to DB
-                await categoryService.InsertAsync(aCategory);
-
                 //Raise event to subscribers
                 OnCategoryAdded?.Invoke(aCategory);
             }
@@ -136,7 +133,7 @@ namespace UI
             }
             if (_originalCategoryText != editedCategory.Text)
             {
-                OnCategoryChanged(editedCategory);
+                OnCategoryTextChanged(editedCategory);
             }
         }
 
