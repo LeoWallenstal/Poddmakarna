@@ -96,6 +96,12 @@ namespace UI
                 {
                     toNotify.UpdateDataSource(_categoryDataSource);
                 }
+
+                
+                    cbCategories.SelectedIndex = 0;
+                    flpMyPods.Controls.Clear();
+                    LoadPodcast(this, EventArgs.Empty);
+                
             };
 
             categoryPanel.OnCategoryTextChanged += async (changedCategory) =>

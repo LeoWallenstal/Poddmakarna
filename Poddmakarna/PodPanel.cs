@@ -31,12 +31,14 @@ namespace UI
         {
             Podcast = podcast;
             categoryDataSource = new BindingList<Category>();
-            UpdateDataSource(dataSource);
+            
 
             InitializeComponent();
             ClearLabels();
             LoadPodcast();
-            LoadCategories();
+            FillDataSource(dataSource);
+            InitDataSource();
+            
 
             dgvEpisodes.CellMouseClick += (s, e) =>
             {
@@ -49,19 +51,37 @@ namespace UI
             //Just nu har rtbPodDesc och rtbEpDesc en 'I'-caret
         }
 
-        public void UpdateComboBoxSelection() { 
-            cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == Podcast.Category);
-        }
-
-        public void UpdateDataSource(BindingList<Category> listToCopy) {
+        private void FillDataSource(BindingList<Category> listToCopy)
+        {
             BindingList<Category> copy = new BindingList<Category>(
-                listToCopy.Select(c => new Category {
-                     Id = c.Id,
-                     Text = c.Text
-                 }).ToList());
+                listToCopy.Select(c => new Category
+                {
+                    Id = c.Id,
+                    Text = c.Text
+                }).ToList());
+
             categoryDataSource = copy;
+            cbCategories.DataSource = categoryDataSource;
             categoryDataSource[0].Text = "Okategoriserad"; //Fixar dummy itemet som ligger först
             categoryDataSource.ResetBindings();
+        }
+
+
+        public void UpdateDataSource(BindingList<Category> listToCopy) {
+            Category selectedCategory = categoryDataSource[cbCategories.SelectedIndex];
+            FillDataSource(listToCopy);
+
+            //Om den tidigare valda kategorin finns kvar, behåll valet.
+            //Annars välj okategoriserad
+            if (categoryDataSource.Any(c => c.Id == selectedCategory.Id))
+            {
+                cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == selectedCategory.Id);
+            }
+            else
+            {
+                cbCategories.SelectedItem = 0; //Okategoriserad
+               
+            }
         }
 
         private void ClearLabels()
@@ -85,27 +105,27 @@ namespace UI
             ShowEpisode(Podcast.Episodes.First());
         }
 
-        private void LoadCategories()
+        private void InitDataSource()
         {
-            cbCategories.Items.Clear();
             cbCategories.DataSource = categoryDataSource;
+            cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
             if (categoryDataSource.Any(c => c.Id == Podcast.Category))
             {
                 cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == Podcast.Category);
             }
 
-            //Hanterar ändring av kategori på en podcast
-            cbCategories.SelectedIndexChanged += (s, e) =>
-            {
-                if (cbCategories.SelectedItem is Category selectedCategory)
+                //Hanterar ändring av kategori på en podcast
+                cbCategories.SelectedIndexChanged += (s, e) =>
                 {
-                    if (Podcast.Category != selectedCategory.Id)
+                    if (cbCategories.SelectedItem is Category selectedCategory)
                     {
-                        Podcast.Category = selectedCategory.Id;
-                        OnCategoryChanged(Podcast);
+                        if (Podcast.Category != selectedCategory.Id)
+                        {
+                            Podcast.Category = selectedCategory.Id;
+                            OnCategoryChanged(Podcast);
+                        }
                     }
-                }
-            };
+                };
         }
 
         private void ShowEpisode(Episode anEpisode)
