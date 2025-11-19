@@ -24,7 +24,7 @@ namespace UI
         private readonly ICategoryService _categoryService;
         private Dictionary<ObjectId, Category> categoryDict = new Dictionary<ObjectId, Category>();
         private Podcast selectedPodcast;
-        private BindingList<Category> _categories;
+        private BindingList<Category> _categoryDataSource;
 
 
         //DEBUG
@@ -53,21 +53,59 @@ namespace UI
 
             CategoryPanel categoryPanel = new CategoryPanel(categoryService);
 
-            categoryPanel.OnCategoryAdded += (aCategory) => {
-                categoryDict.Add(aCategory.Id, aCategory);
-                _categories.Add(aCategory);
+            categoryPanel.OnCategoryAdded += (toAdd) => {
+                categoryDict.Add(toAdd.Id, toAdd);
+                _categoryDataSource.Add(toAdd);
                 //DB delete
             };
-            categoryPanel.OnCategoryRemoved += (aCategory) => { 
-                categoryDict.Remove(aCategory.Id);
-                _categories.Remove(aCategory);
-                //DB delete
+
+            categoryPanel.OnCategoryRemoved += async (toRemove) => {
+                categoryDict.Remove(toRemove.Id);
+
+                //Tar bort från comboboxen :)
+                Category listCategoryToRemove = _categoryDataSource.Where(category => category.Id == toRemove.Id).FirstOrDefault();
+                if (listCategoryToRemove != null) { 
+                    _categoryDataSource.Remove(listCategoryToRemove);
+                }
+
+                //Ta bort från DB
+                await categoryService.DeleteAsync(toRemove);
+
+                //Tar bort en borttagen kategori från PodCards som hade den innan,
+                //samt sätter ObjectId för Podcasten till ObjectId.Empty
+                flpMyPods.Controls
+                    .OfType<PodCard>()
+                    .Where(pc => pc.Podcast.Category == toRemove.Id)
+                    .ToList()
+                    .ForEach(async pc => { 
+                        pc.SetCategoryText("");
+                        await _podService.UpdateCategoryAsync(pc.Podcast, ObjectId.Empty);
+                    });
             };
-            categoryPanel.OnCategoryChanged += (changedCategory) =>
+
+            categoryPanel.OnCategoryChanged += async (changedCategory) =>
             {
-                //Jag antar att den skriver över existerande värde här
-                categoryDict.Add(changedCategory.Id, changedCategory);
-                //VILKEN SKA JAG ÄNDRA????????????????? ses imorrn
+                //Reflekterar nya kategorin i comboboxen
+                Category toChange = _categoryDataSource.Where(category => category.Id == changedCategory.Id).FirstOrDefault();
+                if (toChange != null) {
+                    toChange.Text = changedCategory.Text;            
+                    //Den här raden löste det, men kanske läsa lite på varför...?
+                    _categoryDataSource.ResetBindings();
+                }
+                categoryDict[changedCategory.Id] = changedCategory;
+
+                //Ändrar kategori-texten på PodCards till vänster
+                flpMyPods.Controls
+                    .OfType<PodCard>()
+                    .Where(pc => pc.Podcast.Category == changedCategory.Id)
+                    .ToList()
+                    .ForEach(pc => pc.SetCategoryText(changedCategory.Text));
+
+                //Ändra i DB
+                await categoryService.ReplaceAsync(changedCategory);
+
+                //Tala om för podpanel att ändra sin kategori
+
             };
 
 
@@ -104,7 +142,7 @@ namespace UI
         //Kanske 'async' i namnet...?? 
         private async void InitCategories(object sender, EventArgs e) {
             List<Category> allCategories = await _categoryService.GetAllAsync();
-            _categories = new BindingList<Category>(allCategories);
+            _categoryDataSource = new BindingList<Category>(allCategories);
 
             foreach (Category category in allCategories) {
                 categoryDict[category.Id] = category;
@@ -112,8 +150,10 @@ namespace UI
 
             allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Poddar" });
             cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
-            cbCategories.DataSource = _categories;
+            cbCategories.DataSource = _categoryDataSource;
 
+
+            //HÄR HÄNDER VÄLJANDET AV ETT ITEM I COMBOBOX
             cbCategories.SelectionChangeCommitted += async (s, e) =>
             {
                 Debug.WriteLine("SelectionChangeCommitted!");
@@ -133,6 +173,12 @@ namespace UI
                         foreach (Podcast pod in sortedByCategory)
                         {
                             PodCard podCard = new PodCard(pod);
+                            string category = "";
+                            if (pod.Category != ObjectId.Empty)
+                            {
+                                category = categoryDict[pod.Category].Text;
+                            }
+                            podCard.SetCategoryText(category);
                             flpMyPods.Controls.Add(podCard);
                             podCard.MouseClick += PodCard_Clicked;
                         }

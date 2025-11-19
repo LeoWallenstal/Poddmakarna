@@ -34,5 +34,14 @@ namespace DAL
             var filter = Builders<Podcast>.Filter.Eq(p => p.Category, categoryId);
             return await _collection.Find(filter).ToListAsync();
         }
+
+        public async Task<bool> UpdateCategoryAsync(Podcast podcast, ObjectId categoryId)
+        {
+            var filter = Builders<Podcast>.Filter.Eq(p => p.Id, podcast.Id);
+            var update = Builders<Podcast>.Update.Set(p => p.Category, categoryId);
+            var result = await _collection.UpdateOneAsync(filter, update);
+
+            return result.MatchedCount > 0 || result.ModifiedCount > 0;
+        }
     }
 }

@@ -34,6 +34,11 @@ namespace BL
            return await repository.RssExistsAsync(rssUrl);
         }
 
+        public async Task<bool> UpdateCategoryAsync(Podcast toUpdate, ObjectId newCategory)
+        {
+            return await repository.UpdateCategoryAsync(toUpdate, newCategory);
+        }
+
         public async Task<bool> UpdateTitleAsync(Podcast toUpdate, string newTitle)
         {
             return await repository.UpdateTitleAsync(toUpdate, newTitle);

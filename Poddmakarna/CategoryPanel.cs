@@ -64,9 +64,7 @@ namespace UI
 
             if (dialogResult == DialogResult.Yes)
             {
-                categoryService.DeleteAsync(currentCategory);
                 _categories.Remove(currentCategory);
-
                 OnCategoryRemoved(currentCategory);
             }
         }
@@ -139,7 +137,6 @@ namespace UI
             if (_originalCategoryText != editedCategory.Text)
             {
                 OnCategoryChanged(editedCategory);
-                await categoryService.ReplaceAsync(editedCategory);
             }
         }
 

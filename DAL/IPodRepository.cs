@@ -12,7 +12,7 @@ namespace DAL
     {
         Task<bool> RssExistsAsync(string rssUrl);
         Task<bool> UpdateTitleAsync(Podcast podcast, string title);
-
+        Task<bool> UpdateCategoryAsync(Podcast podcast, ObjectId categoryId);
         Task<List<Podcast>> GetByCategoryAsync(ObjectId categoryId);
     }
 }
