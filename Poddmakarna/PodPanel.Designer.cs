@@ -28,7 +28,7 @@
         /// </summary>
         private void InitializeComponent()
         {
-            DataGridViewCellStyle dataGridViewCellStyle1 = new DataGridViewCellStyle();
+            DataGridViewCellStyle dataGridViewCellStyle2 = new DataGridViewCellStyle();
             pbThumbnail = new PictureBox();
             rtbPodDesc = new RichTextBox();
             rtbPodTitle = new RichTextBox();
@@ -36,7 +36,7 @@
             colTitle = new DataGridViewTextBoxColumn();
             lblEpDate = new Label();
             rtbEpDesc = new RichTextBox();
-            cbCategory = new ComboBox();
+            cbCategories = new ComboBox();
             lblCategory = new Label();
             lblEpDuration = new Label();
             lblEpTitle = new Label();
@@ -86,14 +86,14 @@
             dgvEpisodes.AllowUserToResizeRows = false;
             dgvEpisodes.BackgroundColor = SystemColors.Menu;
             dgvEpisodes.BorderStyle = BorderStyle.None;
-            dataGridViewCellStyle1.Alignment = DataGridViewContentAlignment.MiddleLeft;
-            dataGridViewCellStyle1.BackColor = SystemColors.Control;
-            dataGridViewCellStyle1.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
-            dataGridViewCellStyle1.ForeColor = SystemColors.WindowText;
-            dataGridViewCellStyle1.SelectionBackColor = SystemColors.Highlight;
-            dataGridViewCellStyle1.SelectionForeColor = SystemColors.HighlightText;
-            dataGridViewCellStyle1.WrapMode = DataGridViewTriState.True;
-            dgvEpisodes.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle1;
+            dataGridViewCellStyle2.Alignment = DataGridViewContentAlignment.MiddleLeft;
+            dataGridViewCellStyle2.BackColor = SystemColors.Control;
+            dataGridViewCellStyle2.Font = new Font("Segoe UI", 10F, FontStyle.Bold, GraphicsUnit.Point, 0);
+            dataGridViewCellStyle2.ForeColor = SystemColors.WindowText;
+            dataGridViewCellStyle2.SelectionBackColor = SystemColors.Highlight;
+            dataGridViewCellStyle2.SelectionForeColor = SystemColors.HighlightText;
+            dataGridViewCellStyle2.WrapMode = DataGridViewTriState.True;
+            dgvEpisodes.ColumnHeadersDefaultCellStyle = dataGridViewCellStyle2;
             dgvEpisodes.ColumnHeadersHeightSizeMode = DataGridViewColumnHeadersHeightSizeMode.AutoSize;
             dgvEpisodes.Columns.AddRange(new DataGridViewColumn[] { colTitle });
             dgvEpisodes.Cursor = Cursors.Hand;
@@ -139,13 +139,13 @@
             rtbEpDesc.TabStop = false;
             rtbEpDesc.Text = "";
             // 
-            // cbCategory
+            // cbCategories
             // 
-            cbCategory.FormattingEnabled = true;
-            cbCategory.Location = new Point(87, 159);
-            cbCategory.Name = "cbCategory";
-            cbCategory.Size = new Size(207, 33);
-            cbCategory.TabIndex = 10;
+            cbCategories.FormattingEnabled = true;
+            cbCategories.Location = new Point(87, 159);
+            cbCategories.Name = "cbCategories";
+            cbCategories.Size = new Size(207, 33);
+            cbCategories.TabIndex = 10;
             // 
             // lblCategory
             // 
@@ -182,7 +182,7 @@
             Controls.Add(lblEpTitle);
             Controls.Add(lblEpDuration);
             Controls.Add(lblCategory);
-            Controls.Add(cbCategory);
+            Controls.Add(cbCategories);
             Controls.Add(rtbEpDesc);
             Controls.Add(lblEpDate);
             Controls.Add(dgvEpisodes);
@@ -207,7 +207,7 @@
         private Label lblEpDate;
         private DataGridViewTextBoxColumn colTitle;
         private RichTextBox rtbEpDesc;
-        private ComboBox cbCategory;
+        private ComboBox cbCategories;
         private Label lblCategory;
         private Label lblEpDuration;
         private RichTextBox rtbEpTitle;

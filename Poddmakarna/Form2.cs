@@ -2,6 +2,7 @@
 using DAL;
 using Models;
 using MongoDB.Bson;
+using MongoDB.Driver.Linq;
 using Services;
 using System;
 using System.Collections.Generic;
@@ -22,7 +23,9 @@ namespace UI
     {
         private readonly IPodService _podService;
         private readonly ICategoryService _categoryService;
+        //private Dictionary<ObjectId, Category> categoryDict = new Dictionary<ObjectId, Category>();
         private Podcast selectedPodcast;
+        private BindingList<Category> _categoryDataSource;
 
 
         //DEBUG
@@ -49,7 +52,87 @@ namespace UI
             this.Load += InitCategories;
             btnSave.Hide();
 
-            pCategoryPanel.Controls.Add(new CategoryPanel(categoryService));
+            CategoryPanel categoryPanel = new CategoryPanel(categoryService);
+
+            categoryPanel.OnCategoryAdded += async (toAdd) => {
+                _categoryDataSource.Add(toAdd);
+
+                //Lägg till i DB
+                await categoryService.InsertAsync(toAdd);
+
+                //Säg till podpanel
+                PodPanel toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
+                if (toNotify != null) {
+                    toNotify.UpdateDataSource(_categoryDataSource);
+                }
+                
+            };
+
+            categoryPanel.OnCategoryRemoved += async (toRemove) => {
+
+                //Tar bort från comboboxen :)
+                Category listCategoryToRemove = _categoryDataSource.Where(category => category.Id == toRemove.Id).FirstOrDefault();
+                if (listCategoryToRemove != null) { 
+                    _categoryDataSource.Remove(listCategoryToRemove);
+                }
+
+                //Ta bort från DB
+                await categoryService.DeleteAsync(toRemove);
+
+                //Tar bort en borttagen kategori från PodCards som hade den innan,
+                //samt sätter ObjectId för Podcasten till ObjectId.Empty
+                flpMyPods.Controls
+                    .OfType<PodCard>()
+                    .Where(pc => pc.Podcast.Category == toRemove.Id)
+                    .ToList()
+                    .ForEach(async pc => { 
+                        pc.SetCategoryText("");
+                        await _podService.UpdateCategoryAsync(pc.Podcast, ObjectId.Empty);
+                    });
+
+                //Säg till podpanel
+                PodPanel toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
+                if (toNotify != null)
+                {
+                    toNotify.UpdateDataSource(_categoryDataSource);
+                }
+
+                
+                    cbCategories.SelectedIndex = 0;
+                    flpMyPods.Controls.Clear();
+                    LoadPodcast(this, EventArgs.Empty);
+                
+            };
+
+            categoryPanel.OnCategoryTextChanged += async (changedCategory) =>
+            {
+                //Reflekterar nya kategorin i comboboxen
+                Category toChange = _categoryDataSource.Where(category => category.Id == changedCategory.Id).FirstOrDefault();
+                if (toChange != null) {
+                    toChange.Text = changedCategory.Text;            
+                    //Den här raden löste det, men kanske läsa lite på varför...?
+                    _categoryDataSource.ResetBindings();
+                }
+
+                //Ändrar kategori-texten på PodCards till vänster
+                flpMyPods.Controls
+                    .OfType<PodCard>()
+                    .Where(pc => pc.Podcast.Category == changedCategory.Id)
+                    .ToList()
+                    .ForEach(pc => pc.SetCategoryText(changedCategory.Text));
+
+                //Ändra i DB
+                await categoryService.ReplaceAsync(changedCategory);
+
+                //Tala om för podpanel att ändra sin kategori
+                PodPanel toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
+                if (toNotify != null)
+                {
+                    toNotify.UpdateDataSource(_categoryDataSource);
+                }
+            };
+
+            pCategoryPanel.Controls.Add(categoryPanel);
 
             //Debug
             btnDebugFetchPods.MouseClick += LoadDebugPodcasts;
@@ -82,10 +165,15 @@ namespace UI
         //Kanske 'async' i namnet...?? 
         private async void InitCategories(object sender, EventArgs e) {
             List<Category> allCategories = await _categoryService.GetAllAsync();
-            allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Kategorier" });
-            cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
-            cbCategories.DataSource = allCategories;
+            _categoryDataSource = new BindingList<Category>(allCategories);
 
+
+            allCategories.Insert(0, new Category { Id = ObjectId.Empty, Text = "Alla Poddar" });
+            cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
+            cbCategories.DataSource = _categoryDataSource;
+
+
+            //HÄR HÄNDER VÄLJANDET AV ETT ITEM I COMBOBOX
             cbCategories.SelectionChangeCommitted += async (s, e) =>
             {
                 Debug.WriteLine("SelectionChangeCommitted!");
@@ -105,6 +193,15 @@ namespace UI
                         foreach (Podcast pod in sortedByCategory)
                         {
                             PodCard podCard = new PodCard(pod);
+                            string category = "";
+                            if (pod.Category != ObjectId.Empty)
+                            {
+                                Category cat = _categoryDataSource.FirstOrDefault(c => c.Id == pod.Category);
+                                if (cat != null) {
+                                    category = cat.Text;
+                                }
+                            }
+                            podCard.SetCategoryText(category);
                             flpMyPods.Controls.Add(podCard);
                             podCard.MouseClick += PodCard_Clicked;
                         }
@@ -120,6 +217,16 @@ namespace UI
             foreach (Podcast pod in allaPoddar)
             {
                 PodCard podCard = new PodCard(pod);
+                string category = "";
+                if (pod.Category != ObjectId.Empty)
+                {
+                    Category cat = _categoryDataSource.FirstOrDefault(c => c.Id == pod.Category);
+                    if (cat != null)
+                    {
+                        category = cat.Text;
+                    }
+                }
+                podCard.SetCategoryText(category);
                 flpMyPods.Controls.Add(podCard);
                 podCard.MouseClick += PodCard_Clicked;
             }
@@ -139,10 +246,11 @@ namespace UI
 
         private async void DisplayPodPanel(Podcast podcast)
         {
-            PodPanel toShow = new PodPanel(podcast);
+            PodPanel toShow = new PodPanel(podcast, _categoryDataSource);
             pPodPanel.Controls.Clear();
             pPodPanel.Controls.Add(toShow);
             toShow.OnTitleChanged += ReflectTitleChange;
+            toShow.OnCategoryChanged += ReflectCategoryChange;
 
             selectedPodcast = podcast;
 
@@ -222,18 +330,35 @@ namespace UI
                 var saveSucceeded = await _podService.UpdateTitleAsync(senderPanel.Podcast, senderPanel.PodTitle);
                 if (saveSucceeded) { 
                     int index = GetMyPodsIndex(senderPanel.Podcast.RssUrl);
-                    Debug.WriteLine($"ReflectTitleChange() - Index: {index}");
                     PodCard toChange = flpMyPods.Controls.OfType<PodCard>().ToList()[index];
 
                     //Ändrar objektet i minnet
                     toChange.Podcast.Title = senderPanel.Podcast.Title;
                     //Ändrar labeln i GUI:t
                     toChange.TitleLabel.Text = senderPanel.Podcast.Title;
-                    Debug.WriteLine("podPanel PODCAST-title: " + senderPanel.Podcast.Title);
                     senderPanel.Refresh();
                 }
             }
             Debug.WriteLine("Form2 hör att titeln har ändrats : )))))");
+        }
+
+        private async void ReflectCategoryChange(Podcast changedPodcast) {
+            PodCard toChange = flpMyPods.Controls
+                .OfType<PodCard>()
+                .Where(pc => pc.Podcast.Id == changedPodcast.Id)
+                .First();
+            Category newCategory = _categoryDataSource
+                .Where(c => c.Id == changedPodcast.Category)
+                .First();
+            if (newCategory.Id != ObjectId.Empty)
+            {
+                toChange.SetCategoryText(newCategory.Text);
+            }
+            else {
+                toChange.SetCategoryText("");
+            }
+            //Spara till DB
+            await _podService.UpdateCategoryAsync(changedPodcast, changedPodcast.Category);
         }
 
         private int GetMyPodsIndex(string rssUrl) {

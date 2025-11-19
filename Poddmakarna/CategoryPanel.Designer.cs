@@ -65,6 +65,7 @@
             dgvCategories.RowHeadersWidth = 62;
             dgvCategories.Size = new Size(444, 225);
             dgvCategories.TabIndex = 0;
+            dgvCategories.CellBeginEdit += dgvCategories_CellBeginEdit;
             dgvCategories.CellEndEdit += dgvCategories_CellEndEdit;
             dgvCategories.CellMouseClick += dgvCategories_CellMouseClick;
             dgvCategories.DataBindingComplete += dgvCategories_DataBindingComplete;

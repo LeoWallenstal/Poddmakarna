@@ -1,8 +1,10 @@
 ﻿using Models;
+using MongoDB.Bson;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
+using System.Diagnostics;
 using System.Drawing;
 using System.Linq;
 using System.Text;
@@ -20,13 +22,23 @@ namespace UI
         }
 
         public event EventHandler OnTitleChanged;
+        public event Action<Podcast> OnCategoryChanged;
 
-        public PodPanel(Podcast podcast)
+        //private Dictionary<ObjectId, Category> _categoryDict;
+        private BindingList<Category> categoryDataSource; //Bound with Form2 ComboBox-source
+
+        public PodPanel(Podcast podcast, BindingList<Category> dataSource)
         {
             Podcast = podcast;
+            categoryDataSource = new BindingList<Category>();
+            
+
             InitializeComponent();
             ClearLabels();
             LoadPodcast();
+            FillDataSource(dataSource);
+            InitDataSource();
+            
 
             dgvEpisodes.CellMouseClick += (s, e) =>
             {
@@ -37,8 +49,39 @@ namespace UI
 
             //Nånting med att trolla bort carets på RichTextBoxes som är readonly
             //Just nu har rtbPodDesc och rtbEpDesc en 'I'-caret
+        }
+
+        private void FillDataSource(BindingList<Category> listToCopy)
+        {
+            BindingList<Category> copy = new BindingList<Category>(
+                listToCopy.Select(c => new Category
+                {
+                    Id = c.Id,
+                    Text = c.Text
+                }).ToList());
+
+            categoryDataSource = copy;
+            cbCategories.DataSource = categoryDataSource;
+            categoryDataSource[0].Text = "Okategoriserad"; //Fixar dummy itemet som ligger först
+            categoryDataSource.ResetBindings();
+        }
 
 
+        public void UpdateDataSource(BindingList<Category> listToCopy) {
+            Category selectedCategory = categoryDataSource[cbCategories.SelectedIndex];
+            FillDataSource(listToCopy);
+
+            //Om den tidigare valda kategorin finns kvar, behåll valet.
+            //Annars välj okategoriserad
+            if (categoryDataSource.Any(c => c.Id == selectedCategory.Id))
+            {
+                cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == selectedCategory.Id);
+            }
+            else
+            {
+                cbCategories.SelectedItem = 0; //Okategoriserad
+               
+            }
         }
 
         private void ClearLabels()
@@ -60,6 +103,29 @@ namespace UI
             dgvEpisodes.DataSource = Podcast.Episodes;
 
             ShowEpisode(Podcast.Episodes.First());
+        }
+
+        private void InitDataSource()
+        {
+            cbCategories.DataSource = categoryDataSource;
+            cbCategories.DropDownStyle = ComboBoxStyle.DropDownList;
+            if (categoryDataSource.Any(c => c.Id == Podcast.Category))
+            {
+                cbCategories.SelectedItem = categoryDataSource.First(c => c.Id == Podcast.Category);
+            }
+
+                //Hanterar ändring av kategori på en podcast
+                cbCategories.SelectedIndexChanged += (s, e) =>
+                {
+                    if (cbCategories.SelectedItem is Category selectedCategory)
+                    {
+                        if (Podcast.Category != selectedCategory.Id)
+                        {
+                            Podcast.Category = selectedCategory.Id;
+                            OnCategoryChanged(Podcast);
+                        }
+                    }
+                };
         }
 
         private void ShowEpisode(Episode anEpisode)

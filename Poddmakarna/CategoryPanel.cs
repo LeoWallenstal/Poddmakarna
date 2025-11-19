@@ -15,8 +15,14 @@ namespace UI
 {
     public partial class CategoryPanel : UserControl
     {
+        public event Action<Category> OnCategoryAdded;
+        public event Action<Category> OnCategoryRemoved;
+        public event Action<Category> OnCategoryTextChanged;
+
+
         private readonly ICategoryService categoryService;
         private BindingList<Category> _categories;
+        private string _originalCategoryText;
 
         public CategoryPanel(ICategoryService categoryService)
         {
@@ -58,8 +64,8 @@ namespace UI
 
             if (dialogResult == DialogResult.Yes)
             {
-                categoryService.DeleteAsync(currentCategory);
                 _categories.Remove(currentCategory);
+                OnCategoryRemoved(currentCategory);
             }
         }
 
@@ -95,8 +101,8 @@ namespace UI
                 //Add to UI
                 _categories.Add(aCategory);
 
-                //Add to DB
-                await categoryService.InsertAsync(aCategory);
+                //Raise event to subscribers
+                OnCategoryAdded?.Invoke(aCategory);
             }
         }
 
@@ -110,22 +116,35 @@ namespace UI
 
         private void dgvCategories_Leave(object sender, EventArgs e)
         {
-            dgvCategories.ClearSelection();
-            btnRemove.Enabled = false;
-            btnEdit.Enabled = false;
+            //Lägga en lyssnare på klick i Form2 och köra denna därifrån istället?
+            //dgvCategories.ClearSelection();
+            //btnRemove.Enabled = false;
+            //btnEdit.Enabled = false;
         }
 
-        private void dgvCategories_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        private async void dgvCategories_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
-            Debug.WriteLine("Hello, EndEdit");
+
+            Category editedCategory = _categories[e.RowIndex];
+            if(editedCategory.Text == null)
+            {
+                editedCategory.Text = _originalCategoryText;
+                return;
+            }
+            if (_originalCategoryText != editedCategory.Text)
+            {
+                OnCategoryTextChanged(editedCategory);
+            }
         }
 
         private void dgvCategories_MouseClick(object sender, MouseEventArgs e)
         {
-            if (dgvCategories.CurrentCell.ContentBounds.Contains(e.Location)){
-                dgvCategories.EndEdit();
-                dgvCategories.ClearSelection();
-            }
+
+        }
+
+        private void dgvCategories_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
+        {
+            _originalCategoryText = dgvCategories.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
         }
     }
 }

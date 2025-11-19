@@ -15,6 +15,7 @@ namespace UI
     public partial class PodCard : UserControl
     {
         public Podcast Podcast { get; }
+
         public Label TitleLabel {
             get { return lblTitle; }
         }
@@ -36,10 +37,13 @@ namespace UI
         private void LoadPodCard()
         {
             lblTitle.Text = $"{Podcast.Title}";
-            Debug.WriteLine("Loading PodCard for podcast: " + Podcast.Title);
-            //Kategorier
             pbThumbnail.ImageLocation = Podcast.ImageUrl;
             pbThumbnail.SizeMode = PictureBoxSizeMode.StretchImage;
+        }
+
+        public void SetCategoryText(string categoryText)
+        {
+            lblCategory.Text = categoryText;
         }
     }
 }
