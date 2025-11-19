@@ -122,7 +122,7 @@ namespace UI
             //btnEdit.Enabled = false;
         }
 
-        private async void dgvCategories_CellEndEdit(object sender, DataGridViewCellEventArgs e)
+        private void dgvCategories_CellEndEdit(object sender, DataGridViewCellEventArgs e)
         {
 
             Category editedCategory = _categories[e.RowIndex];

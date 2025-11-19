@@ -11,6 +11,7 @@ using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Net;
 using MongoDB.Bson;
+using System.Xml.Linq;
 
 namespace Services
 {
@@ -31,7 +32,7 @@ namespace Services
                     {
                         Title = rssFeed.Title.Text ?? "No Title",
                         Description = StripHtml(rssFeed.Description.Text) ?? "No description",
-                        ImageUrl = rssFeed.ImageUrl?.ToString() ?? string.Empty,
+                        ImageUrl = StripHtml(GetImageUrl(rssFeed)) ?? string.Empty,
                         Episodes = FetchEpisodesFromRssAsync(rssFeed).Result,
                         RssUrl = rssUrl
                     };
@@ -78,6 +79,22 @@ namespace Services
                 .FirstOrDefault();
 
             return iTunesDuration ?? "";
+        }
+
+        private string GetImageUrl(SyndicationFeed aPod) {
+            if (aPod.ImageUrl != null) {
+                return aPod.ImageUrl.ToString();
+            }
+
+            var itunesImage = aPod.ElementExtensions
+                .ReadElementExtensions<XElement>("image", ItunesNamespace)
+                .FirstOrDefault();
+
+            if (itunesImage != null) {
+                string? imgUrl = itunesImage.Attribute("href")?.Value;
+                return imgUrl;
+            }
+            return "";
         }
 
         private string GetDescription(SyndicationItem anEpisode)

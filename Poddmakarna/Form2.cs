@@ -50,7 +50,7 @@ namespace UI
 
             this.Load += LoadPodcast;
             this.Load += InitCategories;
-            btnSave.Hide();
+            btnSave.Visible = false;
 
             CategoryPanel categoryPanel = new CategoryPanel(categoryService);
 
@@ -256,13 +256,15 @@ namespace UI
 
             if (await _podService.RssExistsAsync(podcast.RssUrl))
             {
-                btnSave.Hide();
-                btnDelete.Show();
+                Debug.WriteLine($"{podcast.Title} already exists!");
+                btnSave.Visible = false;
+                btnDelete.Visible = true;
             }
             else
             {
-                btnSave.Show();
-                btnDelete.Hide();
+                Debug.WriteLine($"{podcast.Title} doesn't exist, which is fine! : )");
+                btnSave.Visible = true;
+                btnDelete.Visible = false;
             }
         }
 
@@ -283,8 +285,8 @@ namespace UI
             if (selectedPodcast != null)
             {
                 await _podService.InsertAsync(selectedPodcast);
-                btnSave.Hide();
-                btnDelete.Show();
+                btnSave.Visible = false;
+                btnDelete.Visible = true;
                 PodCard podCard = new PodCard(selectedPodcast);
                 flpMyPods.Controls.Add(podCard);
                 podCard.MouseClick += PodCard_Clicked;
@@ -296,8 +298,8 @@ namespace UI
             if(selectedPodcast != null)
             {
                 await _podService.DeleteAsync(selectedPodcast);
-                btnDelete.Hide();
-                btnSave.Show();
+                btnDelete.Visible = false;
+                btnSave.Visible = true;
                 foreach (var card in flpMyPods.Controls.OfType<PodCard>().ToList())
                 {
                     //Refaktorisera med GetMyPodsIndex() sen
@@ -308,7 +310,6 @@ namespace UI
                         return;
                     }
                 }
-                
             }
         }
 

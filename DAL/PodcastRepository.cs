@@ -23,11 +23,24 @@ namespace DAL
 
         public async Task<bool> UpdateTitleAsync(Podcast podcast, string newTitle)
         {
-            var filter = Builders<Podcast>.Filter.Eq(p => p.RssUrl, podcast.RssUrl);
-            var update = Builders<Podcast>.Update.Set(p => p.Title, newTitle);
-            var result = await _collection.UpdateOneAsync(filter, update);
+            using (var session = await _client.StartSessionAsync())
+            {
+                session.StartTransaction();
+                try
+                {
+                    var filter = Builders<Podcast>.Filter.Eq(p => p.RssUrl, podcast.RssUrl);
+                    var update = Builders<Podcast>.Update.Set(p => p.Title, newTitle);
+                    var result = await _collection.UpdateOneAsync(filter, update);
 
-            return result.MatchedCount > 0 || result.ModifiedCount > 0;
+                    await session.CommitTransactionAsync();
+
+                    return result.MatchedCount > 0 || result.ModifiedCount > 0;
+                }
+                catch (Exception ex) {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
         }
 
         public async Task<List<Podcast>> GetByCategoryAsync(ObjectId categoryId) {
@@ -37,11 +50,23 @@ namespace DAL
 
         public async Task<bool> UpdateCategoryAsync(Podcast podcast, ObjectId categoryId)
         {
-            var filter = Builders<Podcast>.Filter.Eq(p => p.Id, podcast.Id);
-            var update = Builders<Podcast>.Update.Set(p => p.Category, categoryId);
-            var result = await _collection.UpdateOneAsync(filter, update);
+            using (var session = await _client.StartSessionAsync()) {
+                session.StartTransaction();
+                try
+                {
+                    var filter = Builders<Podcast>.Filter.Eq(p => p.Id, podcast.Id);
+                    var update = Builders<Podcast>.Update.Set(p => p.Category, categoryId);
+                    var result = await _collection.UpdateOneAsync(filter, update);
 
-            return result.MatchedCount > 0 || result.ModifiedCount > 0;
+                    await session.CommitTransactionAsync();
+
+                    return result.MatchedCount > 0 || result.ModifiedCount > 0;
+                }
+                catch (Exception ex) {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
         }
     }
 }

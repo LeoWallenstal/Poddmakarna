@@ -20,15 +20,39 @@ namespace DAL
 
         public async Task InsertAsync(T entity)
         {
-            await _collection.InsertOneAsync(entity);
+            using (var session = await _client.StartSessionAsync())
+            {
+                session.StartTransaction();
+                try
+                {
+                    await _collection.InsertOneAsync(entity);
+                    await session.CommitTransactionAsync();
+                }
+                catch (Exception ex)
+                {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
         }
 
         public async Task<bool> DeleteAsync(T entity)
         {
-            var filter = Builders<T>.Filter.Eq(e => e.Id, entity.Id);
-            var result = await _collection.DeleteOneAsync(filter);
-
-            return (result.DeletedCount > 0);
+            using (var session = await _client.StartSessionAsync()) {
+                session.StartTransaction();
+                try
+                {
+                    var filter = Builders<T>.Filter.Eq(e => e.Id, entity.Id);
+                    var result = await _collection.DeleteOneAsync(filter);
+                    await session.CommitTransactionAsync();
+                    return (result.DeletedCount > 0);
+                }
+                catch(Exception ex)
+                {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
         }
 
         public async Task<List<T>> GetAllAsync()
@@ -38,10 +62,23 @@ namespace DAL
 
         public async Task<bool> ReplaceAsync(T entity)
         {
-            var filter = Builders<T>.Filter.Eq(e => e.Id, entity.Id);
-            var result = await _collection.ReplaceOneAsync(filter, entity);
+            using (var session = await _client.StartSessionAsync())
+            {
+                session.StartTransaction();
+                try
+                {
+                    var filter = Builders<T>.Filter.Eq(e => e.Id, entity.Id);
+                    var result = await _collection.ReplaceOneAsync(filter, entity);
 
-            return (result.MatchedCount > 0 || result.ModifiedCount > 0);
+                    await session.CommitTransactionAsync();
+
+                    return (result.MatchedCount > 0 || result.ModifiedCount > 0);
+                }
+                catch (Exception ex) {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            }
         }
     }
 }
