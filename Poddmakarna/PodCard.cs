@@ -31,7 +31,7 @@ namespace UI
                 {
                     this.OnMouseClick(e);
                 };
-            }   
+            }
         }
 
         private void LoadPodCard()

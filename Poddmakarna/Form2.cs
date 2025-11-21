@@ -25,7 +25,9 @@ namespace UI
         private readonly ICategoryService _categoryService;
         //private Dictionary<ObjectId, Category> categoryDict = new Dictionary<ObjectId, Category>();
         private Podcast selectedPodcast;
+        private PodCard? selectedPodCard;
         private BindingList<Category> _categoryDataSource;
+        private AppSettings appSettings;
 
 
         //DEBUG
@@ -47,9 +49,11 @@ namespace UI
 
             _podService = podService;
             _categoryService = categoryService;
+            appSettings = SettingsSerializer.Deserialize() ?? new AppSettings();
 
             this.Load += LoadPodcast;
             this.Load += InitCategories;
+            this.Load += InitCbUpdateFrequency;
             btnSave.Visible = false;
 
             CategoryPanel categoryPanel = new CategoryPanel(categoryService);
@@ -101,7 +105,7 @@ namespace UI
                     cbCategories.SelectedIndex = 0;
                     flpMyPods.Controls.Clear();
                     LoadPodcast(this, EventArgs.Empty);
-                
+
             };
 
             categoryPanel.OnCategoryTextChanged += async (changedCategory) =>
@@ -160,6 +164,22 @@ namespace UI
                 await _podService.DeleteAsync(podcard.Podcast);
                 flpMyPods.Controls.Remove(podcard);
             }
+        }
+
+        private void InitCbUpdateFrequency(object? sender, EventArgs e) {
+            cbUpdateFreq.SelectionChangeCommitted += (s, e) =>
+            {
+                if (cbUpdateFreq.SelectedValue != appSettings.UpdateInterval) {
+                    appSettings.SetUpdateInterval(cbUpdateFreq.SelectedValue.ToString());
+                    //Skriv till .json
+                    SettingsSerializer.Serialize(appSettings);
+                }
+            };
+
+
+            cbUpdateFreq.Items.AddRange(["Tio Sekunder", "En Dag", "En Vecka", "En Månad"]);
+            cbUpdateFreq.SelectedIndex = cbCategories.Items.IndexOf(appSettings.UpdateInterval);
+            cbUpdateFreq.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 
         //Kanske 'async' i namnet...?? 
@@ -254,6 +274,8 @@ namespace UI
 
             selectedPodcast = podcast;
 
+            HandlePodCardSelection(podcast);
+
             if (await _podService.RssExistsAsync(podcast.RssUrl))
             {
                 Debug.WriteLine($"{podcast.Title} already exists!");
@@ -271,13 +293,26 @@ namespace UI
         private async void btnGetRss_Click(object sender, EventArgs e)
         {
             this.Cursor = Cursors.WaitCursor;
-            Podcast? pendingPodcast = await _podService.FetchPodFromRssAsync(tbRssUrl.Text);
-            if (pendingPodcast != null)
-            {
-                DisplayPodPanel(pendingPodcast);
-            }
-            this.Cursor = Cursors.Default;
 
+            if (await _podService.RssExistsAsync(tbRssUrl.Text)) {
+                PodCard? alreadyExists = flpMyPods.Controls
+                    .OfType<PodCard>()
+                    .Where(pc => pc.Podcast.RssUrl == tbRssUrl.Text)
+                    .FirstOrDefault();
+                if (alreadyExists != null) {
+                    DisplayPodPanel(alreadyExists.Podcast);
+                    flpMyPods.ScrollControlIntoView(alreadyExists); //Kanske??
+                }
+                this.Cursor = Cursors.Default;
+            }
+            else { 
+                Podcast? pendingPodcast = await _podService.FetchPodFromRssAsync(tbRssUrl.Text);
+                if (pendingPodcast != null)
+                {
+                    DisplayPodPanel(pendingPodcast);
+                }
+                this.Cursor = Cursors.Default;
+            }
         }
 
         private async void btnSave_Click(object sender, EventArgs e)
@@ -288,8 +323,19 @@ namespace UI
                 btnSave.Visible = false;
                 btnDelete.Visible = true;
                 PodCard podCard = new PodCard(selectedPodcast);
+                if (selectedPodcast.Category != ObjectId.Empty) {
+                    Category newCategory = _categoryDataSource
+                    .Where(c => c.Id == selectedPodcast.Category)
+                    .First();
+                    if (newCategory.Id != ObjectId.Empty)
+                    {
+                        podCard.SetCategoryText(newCategory.Text);
+                    }
+                }
                 flpMyPods.Controls.Add(podCard);
                 podCard.MouseClick += PodCard_Clicked;
+                flpMyPods.ScrollControlIntoView(podCard); //Scrollar ner till senast tillagda podcard
+                HandlePodCardSelection(podCard.Podcast);
             }
         }
 
@@ -344,10 +390,16 @@ namespace UI
         }
 
         private async void ReflectCategoryChange(Podcast changedPodcast) {
-            PodCard toChange = flpMyPods.Controls
+            PodCard? toChange = flpMyPods.Controls
                 .OfType<PodCard>()
                 .Where(pc => pc.Podcast.Id == changedPodcast.Id)
-                .First();
+                .FirstOrDefault();
+
+            if (toChange == null) {
+
+                return; //toChange finns i DB ännu
+            }
+
             Category newCategory = _categoryDataSource
                 .Where(c => c.Id == changedPodcast.Category)
                 .First();
@@ -372,6 +424,26 @@ namespace UI
             }
             Debug.WriteLine("Returned -1! Check rssUrl?");
             return -1;
+        }
+
+        private void HandlePodCardSelection(Podcast podcast) {
+            if (selectedPodCard != null)
+            {
+                selectedPodCard.BackColor = SystemColors.Menu;
+                selectedPodCard.BorderStyle = BorderStyle.None;
+            }
+
+            selectedPodCard = flpMyPods
+                .Controls
+                .OfType<PodCard>()
+                .Where(pc => pc.Podcast.Id == podcast.Id)
+                .FirstOrDefault();
+
+            if (selectedPodCard != null)
+            {
+                selectedPodCard.BackColor = Color.LightBlue;
+                selectedPodCard.BorderStyle = BorderStyle.FixedSingle;
+            }
         }
     }
 }
