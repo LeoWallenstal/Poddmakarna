@@ -50,6 +50,7 @@ namespace UI
             _podService = podService;
             _categoryService = categoryService;
             appSettings = SettingsSerializer.Deserialize() ?? new AppSettings();
+            Debug.WriteLine("Form2 - appSettings - UpdateInterval: " + appSettings.UpdateInterval);
 
             this.Load += LoadPodcast;
             this.Load += InitCategories;
@@ -178,7 +179,9 @@ namespace UI
 
 
             cbUpdateFreq.Items.AddRange(["Tio Sekunder", "En Dag", "En Vecka", "En Månad"]);
-            cbUpdateFreq.SelectedIndex = cbCategories.Items.IndexOf(appSettings.UpdateInterval);
+            //Förinställda frekvensen visas inte korrekt här
+            cbUpdateFreq.SelectedValue = appSettings.UpdateInterval;
+            //Här^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
             cbUpdateFreq.DropDownStyle = ComboBoxStyle.DropDownList;
         }
 

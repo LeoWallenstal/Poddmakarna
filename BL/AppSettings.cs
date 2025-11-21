@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -26,10 +27,10 @@ namespace BL
                 case "En Dag":
                     UpdateIntervalMs = 86400000;
                     break;
-                case "En vecka":
+                case "En Vecka":
                     UpdateIntervalMs = 604800000;
                     break;
-                case "En måndad":
+                case "En Månad":
                     UpdateIntervalMs = 2419200000;
                     break;
                 default:
@@ -37,6 +38,7 @@ namespace BL
                     break;
             };
             UpdateInterval = interval;
+            Debug.WriteLine("AppSettings: UpdateInterval: " + UpdateInterval);
         }
     }
 }
