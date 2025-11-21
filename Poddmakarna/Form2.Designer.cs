@@ -39,6 +39,8 @@
             btnDebugFetchPods = new Button();
             pCategoryPanel = new Panel();
             btnDebugRemovePodcasts = new Button();
+            cbUpdateFreq = new ComboBox();
+            lblUpdateFreq = new Label();
             SuspendLayout();
             // 
             // flpMyPods
@@ -138,11 +140,30 @@
             btnDebugRemovePodcasts.Text = "[Debug] Ta bort alla poddar";
             btnDebugRemovePodcasts.UseVisualStyleBackColor = true;
             // 
+            // cbUpdateFreq
+            // 
+            cbUpdateFreq.FormattingEnabled = true;
+            cbUpdateFreq.Location = new Point(1704, 894);
+            cbUpdateFreq.Name = "cbUpdateFreq";
+            cbUpdateFreq.Size = new Size(182, 33);
+            cbUpdateFreq.TabIndex = 11;
+            // 
+            // lblUpdateFreq
+            // 
+            lblUpdateFreq.AutoSize = true;
+            lblUpdateFreq.Location = new Point(1513, 897);
+            lblUpdateFreq.Name = "lblUpdateFreq";
+            lblUpdateFreq.Size = new Size(185, 25);
+            lblUpdateFreq.TabIndex = 12;
+            lblUpdateFreq.Text = "Uppdateringsintervall:";
+            // 
             // Form2
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1898, 939);
+            Controls.Add(lblUpdateFreq);
+            Controls.Add(cbUpdateFreq);
             Controls.Add(btnDebugRemovePodcasts);
             Controls.Add(pCategoryPanel);
             Controls.Add(btnDebugFetchPods);
@@ -173,5 +194,7 @@
         private Button btnDebugFetchPods;
         private Panel pCategoryPanel;
         private Button btnDebugRemovePodcasts;
+        private ComboBox cbUpdateFreq;
+        private Label lblUpdateFreq;
     }
 }

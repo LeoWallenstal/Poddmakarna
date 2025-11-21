@@ -58,9 +58,8 @@
             lblCategory.AutoSize = true;
             lblCategory.Location = new Point(112, 55);
             lblCategory.Name = "lblCategory";
-            lblCategory.Size = new Size(78, 25);
+            lblCategory.Size = new Size(0, 25);
             lblCategory.TabIndex = 2;
-            lblCategory.Text = "Kategori";
             // 
             // PodCard
             // 
@@ -70,7 +69,7 @@
             Controls.Add(lblTitle);
             Controls.Add(pbThumbnail);
             Name = "PodCard";
-            Size = new Size(497, 116);
+            Size = new Size(531, 116);
             ((System.ComponentModel.ISupportInitialize)pbThumbnail).EndInit();
             ResumeLayout(false);
             PerformLayout();
