@@ -1,28 +1,20 @@
 ﻿using BL;
 using Models;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 namespace UI
 {
     public partial class CategoryPanel : UserControl
     {
-        public event Action<Category> OnCategoryAdded;
-        public event Action<Category> OnCategoryRemoved;
-        public event Action<Category> OnCategoryTextChanged;
+        public event Action<Category>? OnCategoryAdded;
+        public event Action<Category>? OnCategoryRemoved;
+        public event Action<Category>? OnCategoryTextChanged;
 
 
         private readonly ICategoryService categoryService;
         private BindingList<Category> _categories;
-        private string _originalCategoryText;
+        private string? _originalCategoryText;
 
         public CategoryPanel(ICategoryService categoryService)
         {
@@ -65,7 +57,7 @@ namespace UI
             if (dialogResult == DialogResult.Yes)
             {
                 _categories.Remove(currentCategory);
-                OnCategoryRemoved(currentCategory);
+                OnCategoryRemoved?.Invoke(currentCategory);
             }
         }
 
@@ -93,15 +85,12 @@ namespace UI
             }
             else
             {
-                //Kanske nån label som säger "bra jobbat : )", eller nått
                 Category aCategory = new Category
                 {
                     Text = tbCategory.Text,
                 };
-                //Add to UI
+                //Lägger till i UI:t
                 _categories.Add(aCategory);
-
-                //Raise event to subscribers
                 OnCategoryAdded?.Invoke(aCategory);
             }
         }
@@ -112,14 +101,6 @@ namespace UI
             {
                 dgvCategories.BeginEdit(true);
             }
-        }
-
-        private void dgvCategories_Leave(object sender, EventArgs e)
-        {
-            //Lägga en lyssnare på klick i Form2 och köra denna därifrån istället?
-            //dgvCategories.ClearSelection();
-            //btnRemove.Enabled = false;
-            //btnEdit.Enabled = false;
         }
 
         private void dgvCategories_CellEndEdit(object sender, DataGridViewCellEventArgs e)
@@ -133,18 +114,16 @@ namespace UI
             }
             if (_originalCategoryText != editedCategory.Text)
             {
-                OnCategoryTextChanged(editedCategory);
+                OnCategoryTextChanged?.Invoke(editedCategory);
             }
-        }
-
-        private void dgvCategories_MouseClick(object sender, MouseEventArgs e)
-        {
-
         }
 
         private void dgvCategories_CellBeginEdit(object sender, DataGridViewCellCancelEventArgs e)
         {
-            _originalCategoryText = dgvCategories.Rows[e.RowIndex].Cells[e.ColumnIndex].Value.ToString();
+            _originalCategoryText = 
+                dgvCategories.Rows[e.RowIndex]
+                .Cells[e.ColumnIndex]
+                .Value.ToString();
         }
     }
 }

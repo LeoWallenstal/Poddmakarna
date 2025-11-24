@@ -1,11 +1,5 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.Linq;
-using System.Runtime.CompilerServices;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Markup;
+﻿using System.Diagnostics;
+
 
 namespace BL
 {
@@ -50,7 +44,7 @@ namespace BL
             };
             UpdateInterval = interval;
             Debug.WriteLine($"AppSettings: UpdateInterval: {interval.ToDisplayString()}");
-            OnUpdateIntervalChanged();
+            OnUpdateIntervalChanged?.Invoke();
         }
     }
 

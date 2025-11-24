@@ -1,15 +1,7 @@
 ﻿using Models;
-using MongoDB.Bson;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
+
 
 namespace UI
 {
@@ -21,11 +13,12 @@ namespace UI
             get { return rtbPodTitle.Text; }
         }
 
-        public event EventHandler OnTitleChanged;
-        public event Action<Podcast> OnCategoryChanged;
+        public event EventHandler? OnTitleChanged;
+        public event Action<Podcast>? OnCategoryChanged;
 
-        //private Dictionary<ObjectId, Category> _categoryDict;
-        private BindingList<Category> categoryDataSource; //Bound with Form2 ComboBox-source
+        //Kopia av den som skickas in, för att undvika referensproblem
+        //Detta för att element på index 0 ska heta olika saker beroende på kontext
+        private BindingList<Category>? categoryDataSource; 
 
         public PodPanel(Podcast podcast, BindingList<Category> dataSource)
         {
@@ -122,7 +115,7 @@ namespace UI
                         if (Podcast.Category != selectedCategory.Id)
                         {
                             Podcast.Category = selectedCategory.Id;
-                            OnCategoryChanged(Podcast);
+                            OnCategoryChanged?.Invoke(Podcast);
                         }
                     }
                 };
@@ -146,7 +139,7 @@ namespace UI
             else if (rtbPodTitle.Text != Podcast.Title)
             {
                 Podcast.Title = rtbPodTitle.Text;
-                OnTitleChanged.Invoke(this, EventArgs.Empty);
+                OnTitleChanged?.Invoke(this, EventArgs.Empty);
             }
         }
     }

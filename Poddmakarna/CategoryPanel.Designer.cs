@@ -69,8 +69,6 @@
             dgvCategories.CellEndEdit += dgvCategories_CellEndEdit;
             dgvCategories.CellMouseClick += dgvCategories_CellMouseClick;
             dgvCategories.DataBindingComplete += dgvCategories_DataBindingComplete;
-            dgvCategories.Leave += dgvCategories_Leave;
-            dgvCategories.MouseClick += dgvCategories_MouseClick;
             // 
             // colCategory
             // 

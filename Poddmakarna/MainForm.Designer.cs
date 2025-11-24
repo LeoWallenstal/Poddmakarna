@@ -1,6 +1,6 @@
 ﻿namespace UI
 {
-    partial class Form2
+    partial class MainForm
     {
         /// <summary>
         /// Required designer variable.
@@ -36,9 +36,7 @@
             btnGetRss = new Button();
             btnSave = new Button();
             btnDelete = new Button();
-            btnDebugFetchPods = new Button();
             pCategoryPanel = new Panel();
-            btnDebugRemovePodcasts = new Button();
             cbUpdateFreq = new ComboBox();
             lblUpdateFreq = new Label();
             SuspendLayout();
@@ -115,30 +113,12 @@
             btnDelete.UseVisualStyleBackColor = true;
             btnDelete.Click += btnDelete_Click;
             // 
-            // btnDebugFetchPods
-            // 
-            btnDebugFetchPods.Location = new Point(19, 9);
-            btnDebugFetchPods.Name = "btnDebugFetchPods";
-            btnDebugFetchPods.Size = new Size(214, 34);
-            btnDebugFetchPods.TabIndex = 8;
-            btnDebugFetchPods.Text = "[Debug]Hämta Poddar";
-            btnDebugFetchPods.UseVisualStyleBackColor = true;
-            // 
             // pCategoryPanel
             // 
             pCategoryPanel.Location = new Point(609, 593);
             pCategoryPanel.Name = "pCategoryPanel";
             pCategoryPanel.Size = new Size(450, 334);
             pCategoryPanel.TabIndex = 9;
-            // 
-            // btnDebugRemovePodcasts
-            // 
-            btnDebugRemovePodcasts.Location = new Point(239, 9);
-            btnDebugRemovePodcasts.Name = "btnDebugRemovePodcasts";
-            btnDebugRemovePodcasts.Size = new Size(243, 34);
-            btnDebugRemovePodcasts.TabIndex = 10;
-            btnDebugRemovePodcasts.Text = "[Debug] Ta bort alla poddar";
-            btnDebugRemovePodcasts.UseVisualStyleBackColor = true;
             // 
             // cbUpdateFreq
             // 
@@ -157,16 +137,14 @@
             lblUpdateFreq.TabIndex = 12;
             lblUpdateFreq.Text = "Uppdateringsintervall:";
             // 
-            // Form2
+            // MainForm
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             ClientSize = new Size(1898, 939);
             Controls.Add(lblUpdateFreq);
             Controls.Add(cbUpdateFreq);
-            Controls.Add(btnDebugRemovePodcasts);
             Controls.Add(pCategoryPanel);
-            Controls.Add(btnDebugFetchPods);
             Controls.Add(btnDelete);
             Controls.Add(btnSave);
             Controls.Add(btnGetRss);
@@ -175,7 +153,7 @@
             Controls.Add(lblMyPods);
             Controls.Add(pPodPanel);
             Controls.Add(flpMyPods);
-            Name = "Form2";
+            Name = "MainForm";
             Text = "Poddmakarna";
             ResumeLayout(false);
             PerformLayout();
@@ -191,9 +169,7 @@
         private Button btnGetRss;
         private Button btnSave;
         private Button btnDelete;
-        private Button btnDebugFetchPods;
         private Panel pCategoryPanel;
-        private Button btnDebugRemovePodcasts;
         private ComboBox cbUpdateFreq;
         private Label lblUpdateFreq;
     }
