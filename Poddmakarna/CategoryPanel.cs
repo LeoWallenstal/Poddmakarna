@@ -11,26 +11,29 @@ namespace UI
         public event Action<Category>? OnCategoryRemoved;
         public event Action<Category>? OnCategoryTextChanged;
 
+        /*Funktionsdelegat som ska kopplas på med motsvarande 
+          funktioner från categoryService, i MainForm*/
+        public Func<string, Task<bool>> CategoryExistsAsync;
+        public Func<Task<List<Category>>> GetAllCategoriesAsync;
 
-        private readonly ICategoryService categoryService;
         private BindingList<Category> _categories;
         private string? _originalCategoryText;
 
-        public CategoryPanel(ICategoryService categoryService)
+        public CategoryPanel()
         {
             InitializeComponent();
-            this.categoryService = categoryService;
-            InitCategoryTable();
+            //InitCategoryTable();
 
             btnRemove.Enabled = false;
             btnAdd.Enabled = false;
             btnEdit.Enabled = false;
             lblError.Visible = false;
+            Load += (s, e) => { InitCategoryTable(); };
         }
 
         private async void InitCategoryTable()
         {
-            List<Category> listCategories = await categoryService.GetAllAsync();
+            List<Category> listCategories = await GetAllCategoriesAsync();
             _categories = new BindingList<Category>(listCategories);
 
             dgvCategories.AutoGenerateColumns = false;
@@ -77,7 +80,7 @@ namespace UI
 
         private async void btnAdd_MouseClick(object sender, MouseEventArgs e)
         {
-            bool categoryExists = await categoryService.CategoryExistsAsync(tbCategory.Text);
+            bool categoryExists = await CategoryExistsAsync(tbCategory.Text);
             if (categoryExists)
             {
                 lblError.Text = $"Kategorin \"{tbCategory.Text}\" finns redan!";

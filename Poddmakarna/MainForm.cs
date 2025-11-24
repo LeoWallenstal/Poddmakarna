@@ -38,7 +38,11 @@ namespace UI
             btnDelete.Visible = false;
 
             //Instansiera CategoryPanel och hantera events
-            CategoryPanel categoryPanel = new CategoryPanel(categoryService);
+            CategoryPanel categoryPanel = new CategoryPanel();
+
+            //Koppla på metoder från categoryService till categoryPanel's delegat
+            categoryPanel.GetAllCategoriesAsync = categoryService.GetAllAsync;
+            categoryPanel.CategoryExistsAsync = categoryService.CategoryExistsAsync;
 
             categoryPanel.OnCategoryAdded += async (toAdd) => {
                 _categoryDataSource.Add(toAdd);
