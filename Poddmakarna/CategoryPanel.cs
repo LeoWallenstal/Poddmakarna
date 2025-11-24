@@ -28,6 +28,10 @@ namespace UI
             btnAdd.Enabled = false;
             btnEdit.Enabled = false;
             lblError.Visible = false;
+            
+            /*Init är på Load här för att undvika att
+             GetAllCategoriesAsync() kallas innan delegaten
+            har kopplats på från MainForm*/
             Load += (s, e) => { InitCategoryTable(); };
         }
 
