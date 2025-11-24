@@ -50,7 +50,7 @@ namespace BL
             };
             UpdateInterval = interval;
             Debug.WriteLine($"AppSettings: UpdateInterval: {interval.ToDisplayString()}");
-            OnUpdateIntervalChanged();
+            OnUpdateIntervalChanged?.Invoke();
         }
     }
 

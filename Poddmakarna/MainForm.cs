@@ -1,25 +1,13 @@
 ﻿using BL;
-using DAL;
 using Models;
 using MongoDB.Bson;
 using MongoDB.Driver.Linq;
-using Services;
-using System;
-using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Security.AccessControl;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
-using static System.Net.WebRequestMethods;
 
 namespace UI
 {
-    public partial class Form2 : Form
+    public partial class MainForm : Form
     {
         private readonly IPodService _podService;
         private readonly ICategoryService _categoryService;
@@ -30,20 +18,7 @@ namespace UI
         private PodUpdater podUpdater;
 
 
-        //DEBUG
-        private readonly List<string> podcastUrls = new List<string>() {
-            "https://feed.pod.space/krimrummet",
-            "https://feed.pod.space/svenskafallpodcast",
-            "https://feeds.acast.com/public/shows/d870d9c3-9eb0-4b09-90b4-5c727d6ac077",
-            "https://api.sr.se/api/rss/pod/itunes/3966",
-            "https://feeds.acast.com/public/shows/mer-an-bara-morsa",
-            "https://feeds.acast.com/public/shows/67574d18-1814-47f9-9acb-e04766b06b5f",
-            "https://feed.pod.space/filipandfredrik",
-            "https://feed.pod.space/krogtipsetmedmorbergs",
-            "https://rss.podplaystudio.com/1477.xml",
-            "https://feed.pod.space/alexosigge"
-        };
-        public Form2(IPodService podService, ICategoryService categoryService)
+        public MainForm(IPodService podService, ICategoryService categoryService)
         {
             InitializeComponent();
 
@@ -54,7 +29,7 @@ namespace UI
             podUpdater.OnUpdatePodcasts += UpdatePodcasts;
 
             this.Load += LoadPodcast;
-            this.Load += InitCategories;
+            this.Load += InitCategoriesAsync;
             this.Load += InitCbUpdateFrequency;
             btnSave.Visible = false;
 
@@ -67,11 +42,8 @@ namespace UI
                 await categoryService.InsertAsync(toAdd);
 
                 //Säg till podpanel
-                PodPanel toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
-                if (toNotify != null) {
-                    toNotify.UpdateDataSource(_categoryDataSource);
-                }
-                
+                RefreshPodPanelCategoryDataSource();
+
             };
 
             categoryPanel.OnCategoryRemoved += async (toRemove) => {
@@ -97,16 +69,11 @@ namespace UI
                     });
 
                 //Säg till podpanel
-                PodPanel toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
-                if (toNotify != null)
-                {
-                    toNotify.UpdateDataSource(_categoryDataSource);
-                }
+                RefreshPodPanelCategoryDataSource();
 
-                
-                    cbCategories.SelectedIndex = 0;
-                    flpMyPods.Controls.Clear();
-                    LoadPodcast(this, EventArgs.Empty);
+
+                cbCategories.SelectedIndex = 0;
+                LoadPodcast(this, EventArgs.Empty);
 
             };
 
@@ -131,42 +98,12 @@ namespace UI
                 await categoryService.ReplaceAsync(changedCategory);
 
                 //Tala om för podpanel att ändra sin kategori
-                PodPanel toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
-                if (toNotify != null)
-                {
-                    toNotify.UpdateDataSource(_categoryDataSource);
-                }
+                RefreshPodPanelCategoryDataSource();
             };
 
             pCategoryPanel.Controls.Add(categoryPanel);
-
-            //Debug
-            btnDebugFetchPods.MouseClick += LoadDebugPodcasts;
-            btnDebugRemovePodcasts.MouseClick += RemoveDebugPodcasts;
-            //Debug
         }
 
-        //DEBUG
-        private async void LoadDebugPodcasts(object sender, EventArgs e) {
-            foreach (string url in podcastUrls)
-            {
-                Podcast? pendingPodcast = await _podService.FetchPodFromRssAsync(url);
-                if (pendingPodcast != null)
-                {
-                    flpMyPods.Controls.Add(new PodCard(pendingPodcast));
-                    await _podService.InsertAsync(pendingPodcast);
-                }
-            }
-            DisplayPodPanel(flpMyPods.Controls.OfType<PodCard>().ToList().FirstOrDefault().Podcast);
-        }
-
-        //DEBUG
-        private async void RemoveDebugPodcasts(object sender, EventArgs e) {
-            foreach (PodCard podcard in flpMyPods.Controls) {
-                await _podService.DeleteAsync(podcard.Podcast);
-                flpMyPods.Controls.Remove(podcard);
-            }
-        }
 
         private void InitCbUpdateFrequency(object? sender, EventArgs e) {
             cbUpdateFreq.SelectionChangeCommitted += (s, e) =>
@@ -196,7 +133,7 @@ namespace UI
         }
 
         //Kanske 'async' i namnet...?? 
-        private async void InitCategories(object sender, EventArgs e) {
+        private async void InitCategoriesAsync(object sender, EventArgs e) {
             List<Category> allCategories = await _categoryService.GetAllAsync();
             _categoryDataSource = new BindingList<Category>(allCategories);
 
@@ -209,10 +146,7 @@ namespace UI
             //HÄR HÄNDER VÄLJANDET AV ETT ITEM I COMBOBOX
             cbCategories.SelectionChangeCommitted += async (s, e) =>
             {
-                Debug.WriteLine("SelectionChangeCommitted!");
                 if (cbCategories.SelectedIndex == 0) {
-                    //Clear kanske ska sitta nån annanstans dåra
-                    flpMyPods.Controls.Clear();
                     LoadPodcast(this, EventArgs.Empty);
                 }
                 else
@@ -221,23 +155,7 @@ namespace UI
                     if (selectedCategory != null) {
                         List<Podcast> sortedByCategory = await _podService.GetByCategoryAsync(selectedCategory.Id);
 
-                        flpMyPods.Controls.Clear();
-
-                        foreach (Podcast pod in sortedByCategory)
-                        {
-                            PodCard podCard = new PodCard(pod);
-                            string category = "";
-                            if (pod.Category != ObjectId.Empty)
-                            {
-                                Category cat = _categoryDataSource.FirstOrDefault(c => c.Id == pod.Category);
-                                if (cat != null) {
-                                    category = cat.Text;
-                                }
-                            }
-                            podCard.SetCategoryText(category);
-                            flpMyPods.Controls.Add(podCard);
-                            podCard.MouseClick += PodCard_Clicked;
-                        }
+                        ClearAndRefreshPodList(sortedByCategory);
                     }
                 }
             };
@@ -247,22 +165,7 @@ namespace UI
         {
             List<Podcast> allaPoddar = await _podService.GetAllAsync();
 
-            foreach (Podcast pod in allaPoddar)
-            {
-                PodCard podCard = new PodCard(pod);
-                string category = "";
-                if (pod.Category != ObjectId.Empty)
-                {
-                    Category cat = _categoryDataSource.FirstOrDefault(c => c.Id == pod.Category);
-                    if (cat != null)
-                    {
-                        category = cat.Text;
-                    }
-                }
-                podCard.SetCategoryText(category);
-                flpMyPods.Controls.Add(podCard);
-                podCard.MouseClick += PodCard_Clicked;
-            }
+            ClearAndRefreshPodList(allaPoddar);
 
             if (allaPoddar.Count > 0)
                 DisplayPodPanel(allaPoddar.First());
@@ -272,7 +175,6 @@ namespace UI
         {
             if (sender is PodCard podCard)
             {
-                Debug.WriteLine(flpMyPods.Controls.IndexOf(podCard));
                 DisplayPodPanel(podCard.Podcast);
             }
         }
@@ -291,13 +193,11 @@ namespace UI
 
             if (await _podService.RssExistsAsync(podcast.RssUrl))
             {
-                Debug.WriteLine($"{podcast.Title} already exists!");
                 btnSave.Visible = false;
                 btnDelete.Visible = true;
             }
             else
             {
-                Debug.WriteLine($"{podcast.Title} doesn't exist, which is fine! : )");
                 btnSave.Visible = true;
                 btnDelete.Visible = false;
             }
@@ -335,18 +235,7 @@ namespace UI
                 await _podService.InsertAsync(selectedPodcast);
                 btnSave.Visible = false;
                 btnDelete.Visible = true;
-                PodCard podCard = new PodCard(selectedPodcast);
-                if (selectedPodcast.Category != ObjectId.Empty) {
-                    Category newCategory = _categoryDataSource
-                    .Where(c => c.Id == selectedPodcast.Category)
-                    .First();
-                    if (newCategory.Id != ObjectId.Empty)
-                    {
-                        podCard.SetCategoryText(newCategory.Text);
-                    }
-                }
-                flpMyPods.Controls.Add(podCard);
-                podCard.MouseClick += PodCard_Clicked;
+                PodCard podCard = CreateAndAddPodCard(selectedPodcast);
                 flpMyPods.ScrollControlIntoView(podCard); //Scrollar ner till senast tillagda podcard
                 HandlePodCardSelection(podCard.Podcast);
             }
@@ -399,7 +288,6 @@ namespace UI
                     senderPanel.Refresh();
                 }
             }
-            Debug.WriteLine("Form2 hör att titeln har ändrats : )))))");
         }
 
         private async void ReflectCategoryChange(Podcast changedPodcast) {
@@ -435,7 +323,6 @@ namespace UI
                     return flpMyPods.Controls.IndexOf(card);
                 }
             }
-            Debug.WriteLine("Returned -1! Check rssUrl?");
             return -1;
         }
 
@@ -477,5 +364,44 @@ namespace UI
                 }
             }
         }
+
+        private string GetCategoryText(ObjectId objectId)
+        {
+            if (objectId == ObjectId.Empty)
+                return string.Empty;
+
+            Category? category = _categoryDataSource.FirstOrDefault(c => c.Id == objectId);
+            return category?.Text ?? string.Empty;
+        }
+
+        private PodCard CreateAndAddPodCard(Podcast pod)
+        {
+            var podCard = new PodCard(pod);
+            podCard.SetCategoryText(GetCategoryText(pod.Category));
+
+            flpMyPods.Controls.Add(podCard);
+            podCard.MouseClick += PodCard_Clicked;
+
+            return podCard;
+        }
+
+        private void RefreshPodPanelCategoryDataSource()
+        {
+            PodPanel? toNotify = pPodPanel.Controls.OfType<PodPanel>().FirstOrDefault();
+            toNotify?.UpdateDataSource(_categoryDataSource);
+        }
+
+        private void ClearAndRefreshPodList(IEnumerable<Podcast> podcasts)
+        {
+            flpMyPods.Controls.Clear();
+
+            foreach(Podcast pod in podcasts)
+            {
+                CreateAndAddPodCard(pod);
+            }
+        }
+
     }
+
+
 }

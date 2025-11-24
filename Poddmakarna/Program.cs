@@ -27,7 +27,7 @@ namespace Poddmakarna
             ICategoryRepository categoryRepo = new CategoryRepository(_dbContext.Database.GetCollection<Category>("Categories"), _dbContext.Client);
             ICategoryService categoryService = new CategoryService(categoryRepo);
 
-            Application.Run(new Form2(podService, categoryService));
+            Application.Run(new MainForm(podService, categoryService));
         }
     }
 }
