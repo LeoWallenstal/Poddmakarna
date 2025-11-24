@@ -11,11 +11,11 @@ namespace UI
     {
         private readonly IPodService _podService;
         private readonly ICategoryService _categoryService;
-        private Podcast selectedPodcast;
+        private Podcast? selectedPodcast;
         private PodCard? selectedPodCard;
-        private BindingList<Category> _categoryDataSource;
-        private AppSettings appSettings;
-        private PodUpdater podUpdater;
+        private BindingList<Category>? _categoryDataSource;
+        private readonly AppSettings appSettings;
+        private readonly PodUpdater podUpdater;
 
 
         public MainForm(IPodService podService, ICategoryService categoryService)
@@ -28,11 +28,16 @@ namespace UI
             podUpdater = new PodUpdater(appSettings);
             podUpdater.OnUpdatePodcasts += UpdatePodcasts;
 
-            this.Load += LoadPodcast;
-            this.Load += InitCategoriesAsync;
-            this.Load += InitCbUpdateFrequency;
-            btnSave.Visible = false;
+            //Satt förut på this.Load
+            LoadPodcast();
+            InitCategoriesAsync();
+            InitCbUpdateFrequency();
 
+            //Knappen ska vara osynlig tills man hämtat en RSS som inte finns i DB
+            btnSave.Visible = false;
+            btnDelete.Visible = false;
+
+            //Instansiera CategoryPanel och hantera events
             CategoryPanel categoryPanel = new CategoryPanel(categoryService);
 
             categoryPanel.OnCategoryAdded += async (toAdd) => {
@@ -73,7 +78,7 @@ namespace UI
 
 
                 cbCategories.SelectedIndex = 0;
-                LoadPodcast(this, EventArgs.Empty);
+                LoadPodcast();
 
             };
 
@@ -105,7 +110,7 @@ namespace UI
         }
 
 
-        private void InitCbUpdateFrequency(object? sender, EventArgs e) {
+        private void InitCbUpdateFrequency() {
             cbUpdateFreq.SelectionChangeCommitted += (s, e) =>
             {
                 if (cbUpdateFreq.SelectedValue is UpdateInterval selected &&
@@ -116,24 +121,23 @@ namespace UI
                 }
             };
 
-            //Fill CB
+            //Fyller comboboxen med värden från enum
             var items = UpdateIntervalExtensions.Values
-                .Select(updateInterval => new {         //Anonymous object
+                .Select(updateInterval => new {         //Anonymt objekt
                     Value = updateInterval,
                     Name = updateInterval.ToDisplayString()
                 })
                 .ToList();
 
-            cbUpdateFreq.DisplayMember = "Name"; //What to display in the combobox
-            cbUpdateFreq.ValueMember = "Value";  //What to return from the combobox.SelectedValue
+            cbUpdateFreq.DisplayMember = "Name"; //Vad som visas i comboboxen
+            cbUpdateFreq.ValueMember = "Value";  //Vad som returneras av combobox.SelectedValue
             cbUpdateFreq.DropDownStyle = ComboBoxStyle.DropDownList;
 
             cbUpdateFreq.DataSource = items;
             cbUpdateFreq.SelectedValue = appSettings.UpdateInterval;
         }
 
-        //Kanske 'async' i namnet...?? 
-        private async void InitCategoriesAsync(object sender, EventArgs e) {
+        private async void InitCategoriesAsync() {
             List<Category> allCategories = await _categoryService.GetAllAsync();
             _categoryDataSource = new BindingList<Category>(allCategories);
 
@@ -147,7 +151,7 @@ namespace UI
             cbCategories.SelectionChangeCommitted += async (s, e) =>
             {
                 if (cbCategories.SelectedIndex == 0) {
-                    LoadPodcast(this, EventArgs.Empty);
+                    LoadPodcast();
                 }
                 else
                 {
@@ -161,7 +165,7 @@ namespace UI
             };
         }
 
-        private async void LoadPodcast(object sender, EventArgs e)
+        private async void LoadPodcast()
         {
             List<Podcast> allaPoddar = await _podService.GetAllAsync();
 
@@ -169,14 +173,6 @@ namespace UI
 
             if (allaPoddar.Count > 0)
                 DisplayPodPanel(allaPoddar.First());
-        }
-
-        public void PodCard_Clicked(object sender, EventArgs e)
-        {
-            if (sender is PodCard podCard)
-            {
-                DisplayPodPanel(podCard.Podcast);
-            }
         }
 
         private async void DisplayPodPanel(Podcast podcast)
@@ -191,6 +187,7 @@ namespace UI
 
             HandlePodCardSelection(podcast);
 
+            //Kollar om podcasten finns i DB för att visa rätt knappar
             if (await _podService.RssExistsAsync(podcast.RssUrl))
             {
                 btnSave.Visible = false;
@@ -205,18 +202,12 @@ namespace UI
 
         private async void btnGetRss_Click(object sender, EventArgs e)
         {
-            this.Cursor = Cursors.WaitCursor;
-
             if (await _podService.RssExistsAsync(tbRssUrl.Text)) {
-                PodCard? alreadyExists = flpMyPods.Controls
-                    .OfType<PodCard>()
-                    .Where(pc => pc.Podcast.RssUrl == tbRssUrl.Text)
-                    .FirstOrDefault();
+                PodCard? alreadyExists = FindPodCardByRss(tbRssUrl.Text);
                 if (alreadyExists != null) {
                     DisplayPodPanel(alreadyExists.Podcast);
-                    flpMyPods.ScrollControlIntoView(alreadyExists); //Kanske??
+                    flpMyPods.ScrollControlIntoView(alreadyExists);
                 }
-                this.Cursor = Cursors.Default;
             }
             else { 
                 Podcast? pendingPodcast = await _podService.FetchPodFromRssAsync(tbRssUrl.Text);
@@ -224,7 +215,6 @@ namespace UI
                 {
                     DisplayPodPanel(pendingPodcast);
                 }
-                this.Cursor = Cursors.Default;
             }
         }
 
@@ -233,8 +223,9 @@ namespace UI
             if (selectedPodcast != null)
             {
                 await _podService.InsertAsync(selectedPodcast);
-                btnSave.Visible = false;
-                btnDelete.Visible = true;
+                
+                //Växla synlighet på knapparna
+                (btnDelete.Visible, btnSave.Visible) = (btnSave.Visible, btnDelete.Visible);
                 PodCard podCard = CreateAndAddPodCard(selectedPodcast);
                 flpMyPods.ScrollControlIntoView(podCard); //Scrollar ner till senast tillagda podcard
                 HandlePodCardSelection(podCard.Podcast);
@@ -246,23 +237,20 @@ namespace UI
             if(selectedPodcast != null)
             {
                 await _podService.DeleteAsync(selectedPodcast);
-                btnDelete.Visible = false;
-                btnSave.Visible = true;
-                foreach (var card in flpMyPods.Controls.OfType<PodCard>().ToList())
+                PodCard? toRemove = FindPodCardByRss(selectedPodcast.RssUrl);
+                if (toRemove != null)
                 {
-                    //Refaktorisera med GetMyPodsIndex() sen
-                    if (card.Podcast.RssUrl == selectedPodcast.RssUrl) {
-                        int index = flpMyPods.Controls.IndexOf(card);
-                        flpMyPods.Controls.Remove(card);
-                        DisplayAfterDelete(index);
-                        return;
-                    }
+                    int index = flpMyPods.Controls.IndexOf(toRemove);
+                    flpMyPods.Controls.Remove(toRemove);
+                    DisplayAfterDelete(index);
                 }
             }
         }
 
         private void DisplayAfterDelete(int index) {
             if (flpMyPods.Controls.Count == 0) {
+                btnSave.Visible = false;
+                btnDelete.Visible = false;
                 pPodPanel.Controls.Clear(); //Om flpMyPods är tom så visas ingenting i högra panelen
                 return;
             }
@@ -274,27 +262,24 @@ namespace UI
             DisplayPodPanel(toDisplay.Podcast);
         }
 
-        private async void ReflectTitleChange(object sender, EventArgs e) {
+        private async void ReflectTitleChange(object? sender, EventArgs e) {
             if (sender is PodPanel senderPanel) {
                 var saveSucceeded = await _podService.UpdateTitleAsync(senderPanel.Podcast, senderPanel.PodTitle);
-                if (saveSucceeded) { 
-                    int index = GetMyPodsIndex(senderPanel.Podcast.RssUrl);
-                    PodCard toChange = flpMyPods.Controls.OfType<PodCard>().ToList()[index];
-
-                    //Ändrar objektet i minnet
-                    toChange.Podcast.Title = senderPanel.Podcast.Title;
-                    //Ändrar labeln i GUI:t
-                    toChange.TitleLabel.Text = senderPanel.Podcast.Title;
-                    senderPanel.Refresh();
+                if (saveSucceeded) {                         
+                    PodCard? toChange = FindPodCardByRss(senderPanel.Podcast.RssUrl);
+                    if (toChange != null) { 
+                        //Ändrar objektet i minnet
+                        toChange.Podcast.Title = senderPanel.Podcast.Title;
+                        //Ändrar labeln i GUI:t
+                        toChange.TitleLabel.Text = senderPanel.Podcast.Title;
+                        senderPanel.Refresh();
+                    }
                 }
             }
         }
 
         private async void ReflectCategoryChange(Podcast changedPodcast) {
-            PodCard? toChange = flpMyPods.Controls
-                .OfType<PodCard>()
-                .Where(pc => pc.Podcast.Id == changedPodcast.Id)
-                .FirstOrDefault();
+            PodCard? toChange = FindPodCardById(changedPodcast.Id);
 
             if (toChange == null) {
 
@@ -315,29 +300,30 @@ namespace UI
             await _podService.UpdateCategoryAsync(changedPodcast, changedPodcast.Category);
         }
 
-        private int GetMyPodsIndex(string rssUrl) {
-            foreach (var card in flpMyPods.Controls.OfType<PodCard>().ToList())
-            {
-                if (card.Podcast.RssUrl == rssUrl)
-                {
-                    return flpMyPods.Controls.IndexOf(card);
-                }
-            }
-            return -1;
+        private PodCard? FindPodCardById(ObjectId podcastId)
+        {
+            return flpMyPods.Controls
+                .OfType<PodCard>()
+                .FirstOrDefault(pc => pc.Podcast.Id == podcastId);
         }
 
+        private PodCard? FindPodCardByRss(string rssUrl)
+        {
+            return flpMyPods.Controls
+                .OfType<PodCard>()
+                .FirstOrDefault(pc => pc.Podcast.RssUrl == rssUrl);
+        }
+
+
         private void HandlePodCardSelection(Podcast podcast) {
+            //Kollar om det finns en vald podcard för att då "deselecta" den
             if (selectedPodCard != null)
             {
                 selectedPodCard.BackColor = SystemColors.Menu;
                 selectedPodCard.BorderStyle = BorderStyle.None;
             }
 
-            selectedPodCard = flpMyPods
-                .Controls
-                .OfType<PodCard>()
-                .Where(pc => pc.Podcast.Id == podcast.Id)
-                .FirstOrDefault();
+            selectedPodCard = FindPodCardById(podcast.Id);
 
             if (selectedPodCard != null)
             {
@@ -357,6 +343,7 @@ namespace UI
                 if (updated != null) {
                     aPodCard.Podcast = updated;
                     if (selectedPodCard != null && selectedPodCard.Podcast.Id == aPodCard.Podcast.Id) {
+                        //Invokar på UI-tråden istället för timer-tråden (podUpdater)
                         Invoke((MethodInvoker)(() => {
                             DisplayPodPanel(aPodCard.Podcast);
                         }));
@@ -380,7 +367,13 @@ namespace UI
             podCard.SetCategoryText(GetCategoryText(pod.Category));
 
             flpMyPods.Controls.Add(podCard);
-            podCard.MouseClick += PodCard_Clicked;
+            podCard.MouseClick += (s, e) =>
+            {
+                if (s is PodCard podCard)
+                {
+                    DisplayPodPanel(podCard.Podcast);
+                }
+            };
 
             return podCard;
         }

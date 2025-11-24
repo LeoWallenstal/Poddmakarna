@@ -1,18 +1,10 @@
 ﻿using Models;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using System.Xml;
 using System.ServiceModel.Syndication;
-using System.Linq.Expressions;
 using System.Diagnostics;
 using System.Text.RegularExpressions;
 using System.Net;
-using MongoDB.Bson;
 using System.Xml.Linq;
-using System.Globalization;
 
 namespace Services
 {

@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.ServiceModel.Syndication;
-using System.Text;
-using System.Threading.Tasks;
-using DAL;
+﻿using DAL;
 using Models;
 using MongoDB.Bson;
 using Services;
@@ -14,7 +8,6 @@ namespace BL
     public class PodcastService : EntityService<Podcast, IPodRepository>, IPodService
     {
         private readonly IRssReader _rssReader;
-        //Kolla om detta är en bra lösning??
         public PodcastService(IPodRepository repository, IRssReader rssReader) : base(repository){
             _rssReader = rssReader;
         }

@@ -1,14 +1,4 @@
 ﻿using Models;
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
-using System.Diagnostics;
-using System.Drawing;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using System.Windows.Forms;
 
 namespace UI
 {
@@ -25,7 +15,9 @@ namespace UI
             InitializeComponent();
             LoadPodCard();
 
-            foreach(Control c in this.Controls)
+            //Vidarebefordra MouseClick eventet från alla underkontroller till PodCard
+            //så att klick på t.ex. bilden också räknas som klick på PodCard
+            foreach (Control c in this.Controls)
             {
                 c.MouseClick += (s, e) => 
                 {
