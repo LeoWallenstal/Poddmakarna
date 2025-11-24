@@ -23,11 +23,11 @@ namespace UI
     {
         private readonly IPodService _podService;
         private readonly ICategoryService _categoryService;
-        //private Dictionary<ObjectId, Category> categoryDict = new Dictionary<ObjectId, Category>();
         private Podcast selectedPodcast;
         private PodCard? selectedPodCard;
         private BindingList<Category> _categoryDataSource;
         private AppSettings appSettings;
+        private PodUpdater podUpdater;
 
 
         //DEBUG
@@ -49,8 +49,9 @@ namespace UI
 
             _podService = podService;
             _categoryService = categoryService;
-            appSettings = SettingsSerializer.Deserialize() ?? new AppSettings();
-            Debug.WriteLine("Form2 - appSettings - UpdateInterval: " + appSettings.UpdateInterval);
+            appSettings = SettingsSerializer.Deserialize() ?? new AppSettings(UpdateInterval.OneDay);
+            podUpdater = new PodUpdater(appSettings);
+            podUpdater.OnUpdatePodcasts += UpdatePodcasts;
 
             this.Load += LoadPodcast;
             this.Load += InitCategories;
@@ -170,19 +171,28 @@ namespace UI
         private void InitCbUpdateFrequency(object? sender, EventArgs e) {
             cbUpdateFreq.SelectionChangeCommitted += (s, e) =>
             {
-                if (cbUpdateFreq.SelectedValue != appSettings.UpdateInterval) {
-                    appSettings.SetUpdateInterval(cbUpdateFreq.SelectedValue.ToString());
+                if (cbUpdateFreq.SelectedValue is UpdateInterval selected &&
+                    selected != appSettings.UpdateInterval) {
+                    appSettings.SetUpdateInterval(selected);
                     //Skriv till .json
                     SettingsSerializer.Serialize(appSettings);
                 }
             };
 
+            //Fill CB
+            var items = UpdateIntervalExtensions.Values
+                .Select(updateInterval => new {         //Anonymous object
+                    Value = updateInterval,
+                    Name = updateInterval.ToDisplayString()
+                })
+                .ToList();
 
-            cbUpdateFreq.Items.AddRange(["Tio Sekunder", "En Dag", "En Vecka", "En Månad"]);
-            //Förinställda frekvensen visas inte korrekt här
-            cbUpdateFreq.SelectedValue = appSettings.UpdateInterval;
-            //Här^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            cbUpdateFreq.DisplayMember = "Name"; //What to display in the combobox
+            cbUpdateFreq.ValueMember = "Value";  //What to return from the combobox.SelectedValue
             cbUpdateFreq.DropDownStyle = ComboBoxStyle.DropDownList;
+
+            cbUpdateFreq.DataSource = items;
+            cbUpdateFreq.SelectedValue = appSettings.UpdateInterval;
         }
 
         //Kanske 'async' i namnet...?? 
@@ -446,6 +456,25 @@ namespace UI
             {
                 selectedPodCard.BackColor = Color.LightBlue;
                 selectedPodCard.BorderStyle = BorderStyle.FixedSingle;
+            }
+        }
+
+        private async void UpdatePodcasts() {
+            List<Podcast> allPodcasts = flpMyPods.Controls.OfType<PodCard>().Select(pc => pc.Podcast).ToList();
+
+            List<Podcast> updatedPodcasts = await _podService.FetchNewEpisodes(allPodcasts);
+
+            foreach (PodCard aPodCard in flpMyPods.Controls.OfType<PodCard>()) {
+                Podcast? updated = updatedPodcasts.FirstOrDefault(p => p.Id == aPodCard.Podcast.Id);
+
+                if (updated != null) {
+                    aPodCard.Podcast = updated;
+                    if (selectedPodCard != null && selectedPodCard.Podcast.Id == aPodCard.Podcast.Id) {
+                        Invoke((MethodInvoker)(() => {
+                            DisplayPodPanel(aPodCard.Podcast);
+                        }));
+                    }
+                }
             }
         }
     }

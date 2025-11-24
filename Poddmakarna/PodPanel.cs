@@ -132,7 +132,7 @@ namespace UI
         {
             lblEpTitle.Text = anEpisode.Title;
             rtbEpDesc.Text = anEpisode.Description;
-            lblEpDate.Text = anEpisode.PublishedDate;
+            lblEpDate.Text = anEpisode.PublishedDate.ToString("yyyy:MM:dd HH:mm:ss") ?? "";
             lblEpDuration.Text = anEpisode.Duration;
         }
 

@@ -12,6 +12,7 @@ using System.Text.RegularExpressions;
 using System.Net;
 using MongoDB.Bson;
 using System.Xml.Linq;
+using System.Globalization;
 
 namespace Services
 {
@@ -63,7 +64,7 @@ namespace Services
                     {
                         Title = anEpisode.Title.Text ?? "No Title",
                         Description = StripHtml(GetDescription(anEpisode)),
-                        PublishedDate = anEpisode.PublishDate.ToString("yyyy-MM-dd HH:ss") ?? "No published date",
+                        PublishedDate = anEpisode.PublishDate,
                         Duration = GetDuration(anEpisode)
                     };
                     allEpisodes.Add(episode);
@@ -137,6 +138,49 @@ namespace Services
             var withoutEntities = WebUtility.HtmlDecode(withoutTags);
 
             return withoutEntities.Trim();
+        }
+
+        public async Task<Dictionary<Podcast, List<Episode>>> FetchNewEpisodes(List<Podcast> toUpdate)
+        {
+            Dictionary<Podcast, List<Episode>> toReturn = new Dictionary<Podcast, List<Episode>>();
+
+            foreach(Podcast aPodcast in toUpdate)
+            {
+                await Task.Run(() =>
+                {
+                    try
+                    {
+                        XmlReader xmlReader = XmlReader.Create(aPodcast.RssUrl);
+                        SyndicationFeed rssFeed = SyndicationFeed.Load(xmlReader);
+                        Episode latestEp = aPodcast.Episodes[0];
+
+                        Debug.WriteLine($"LatestEp: {latestEp.PublishedDate.ToString()}" +
+                            $"\nFeedItem:{rssFeed.Items.First().PublishDate}");
+
+                        List<Episode> newEpisodes = rssFeed.Items
+                            .Where(feedItem => feedItem.PublishDate > latestEp.PublishedDate)
+                            .Select(feedItem => new Episode
+                            {
+                                Title = feedItem.Title.Text ?? "No Title",
+                                Description = StripHtml(GetDescription(feedItem)),
+                                PublishedDate = feedItem.PublishDate,
+                                Duration = GetDuration(feedItem)
+                            }).ToList();
+
+                        if (newEpisodes.Count > 0)
+                        {
+                            aPodcast.Episodes.InsertRange(0, newEpisodes);
+                            toReturn.Add(aPodcast, newEpisodes);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        // Handle exceptions (e.g., log the error)
+                        Debug.WriteLine($"Error fetching RSS feed: {ex.Message}");
+                    }
+                });
+            }
+            return toReturn;
         }
     }
 }

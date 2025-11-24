@@ -68,5 +68,27 @@ namespace DAL
                 }
             }
         }
+
+        public async Task<bool> UpdateNewEpisodes(Podcast toUpdate, List<Episode> newEpisodes)
+        {
+            using (var session = await _client.StartSessionAsync()) {
+                session.StartTransaction();
+                try
+                {
+                    var filter = Builders<Podcast>.Filter.Eq(p => p.Id, toUpdate.Id);
+                    var update = Builders<Podcast>.Update.PushEach(p => p.Episodes, newEpisodes, position: 0);
+                    var result = await _collection.UpdateOneAsync(filter, update);
+
+                    await session.CommitTransactionAsync();
+
+                    return result.MatchedCount > 0 || result.ModifiedCount > 0;
+                }
+                catch (Exception ex)
+                {
+                    await session.AbortTransactionAsync();
+                    throw;
+                }
+            } 
+        }
     }
 }
