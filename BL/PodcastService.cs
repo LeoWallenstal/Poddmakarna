@@ -43,5 +43,15 @@ namespace BL
         {
             return await repository.UpdateTitleAsync(toUpdate, newTitle);
         }
+
+        public async Task<List<Podcast>> FetchNewEpisodes(List<Podcast> toUpdate) {
+            Dictionary<Podcast, List<Episode>> updatedPodcasts =  await _rssReader.FetchNewEpisodes(toUpdate);
+
+            foreach (Podcast aPodcast in updatedPodcasts.Keys) { 
+                await repository.UpdateNewEpisodes(aPodcast, updatedPodcasts[aPodcast]);
+            }
+
+            return updatedPodcasts.Keys.ToList();
+        }
     }
 }

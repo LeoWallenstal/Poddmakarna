@@ -12,5 +12,7 @@ namespace Services
     {
         Task<Podcast?> GetPodcastFromRssAsync(string rssUrl);
         Task<List<Episode>> FetchEpisodesFromRssAsync(SyndicationFeed rssFeed);
+
+        Task<Dictionary<Podcast, List<Episode>>> FetchNewEpisodes(List<Podcast> toUpdate);
     }
 }
