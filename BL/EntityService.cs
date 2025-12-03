@@ -16,26 +16,22 @@ namespace BL
 
         public async Task InsertAsync(T entity)
         {
-            //validering : )
             await repository.InsertAsync(entity);
         }
 
         public async Task<bool> DeleteAsync(T entity)
         {
-            //validering : )
             var result = await repository.DeleteAsync(entity);
             return result;        
         }
 
         public async Task<List<T>> GetAllAsync()
         {
-            //validering : )
             return await repository.GetAllAsync();
         }
 
         public async Task<bool> ReplaceAsync(T entity)
         {
-            //validering : )
             return await repository.ReplaceAsync(entity);
         }
     }
