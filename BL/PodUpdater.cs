@@ -18,7 +18,7 @@ namespace BL
         public void Start(TimeSpan duration) {
 
             _updateTimer ??= new Timer(UpdateTimerCallback, null, Timeout.Infinite, Timeout.Infinite);
-            _updateTimer.Change((int)(duration.TotalMilliseconds), Timeout.Infinite);
+            _updateTimer.Change((long)(duration.TotalMilliseconds), Timeout.Infinite);
         }
 
         private void UpdateTimerCallback(object? state) {
